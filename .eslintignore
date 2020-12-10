@@ -1,0 +1,22 @@
+# By default eslint ignores dotfiles
+.eslintrc.js
+.huskyrc.js
+.lintstagedrc.js
+.prettierrc.js
+.babelrc.js
+.stylelintrc.js
+# !.storybook
+
+webpack.dev.config.js
+webpack.prod.config.js
+webpack.server.config.js
+
+public
+static
+.cache
+build
+dist
+content
+node_modules
+config
+scripts
