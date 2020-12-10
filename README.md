@@ -521,3 +521,148 @@ This is static function to simplify creating of OpResult object with simple erro
 ```js
 const r = OpResult.fail(OP_RESULT_CODES.NOT_FOUND, {}, 'Object not found');
 ```
+
+# ApiWrapper
+
+The helper class wraps `axios.request` method to do a request to the server and then pass received json object into OpResult for further work. Also, the class catches all exceptions that may happen and also returns OpResult object.
+
+## ApiWrapper propeties
+
+### baseApiUrl
+
+The property `baseApiUrl` stores root path to the API. For example, 'https://my-api.com/v1/'. Note that it must end with '/'.
+
+### onException
+
+The `onException` property is a function that is called if some exception happens. This is per request property.
+
+### static fetchFnOpts
+
+The `fetchFnOpts` defines default configuration parameters supplied to `axios.request` method. By default it looks like:
+
+```js
+...
+static fetchFnOpts: any = {
+  withCredentials: true,
+  timeout: 0,
+};
+...
+```
+
+### static fetcnFn
+
+This is static function used by all instances of the `ApiWrapper` and it does actuall call of the `axios.request`. You can override the function if you want to use another library to send requests. Just make sure it returns response the same way as `axios.request`.
+
+### static onExceptionFn
+
+This is the function that is assigned to each `ApiWrapper` instance if no `OnException` prop passed to constructor. By default, the function just console.error information about exception.
+
+### get(path: string, params: any)
+
+Sends GET request to the server with provided path and params.
+
+```js
+const api = new ApiWrapper({ baseApiUrl: 'https://my-server.com/v1/' });
+const r = await api.get('user/123', { some: 'something' }); // => GET https://my-server.com/v1/user/123?some=something
+// r = {
+//   code: 0,
+//   data: [
+//     {
+//       name: 'John'
+//     }
+//   ],
+//   errors: {}
+// }
+// or
+// r = {
+//   code: -20200,
+//   data: [],
+//   errors: {
+//     name: {
+//       errors: ['Such user not found']
+//     }
+//   }
+// }
+```
+
+### post(path: string, data?: any, params: any = {})
+
+Sends POST request to the server with provided path and params. Used to create an entity on the server.
+
+```js
+const api = new ApiWrapper({ baseApiUrl: 'https://my-server.com/v1/' });
+const r = await api.post('user', { name: 'John' }); // => POST https://my-server.com/v1/user
+// r = {
+//   code: 0,
+//   data: [
+//     {
+//       id: 123,
+//       name: 'John'
+//     }
+//   ],
+//   errors: {}
+// }
+// or
+// r = {
+//   code: -20300,
+//   data: [],
+//   errors: {
+//     name: {
+//       errors: ['Such user already exists']
+//     }
+//   }
+// }
+```
+
+### put(path: string, data?: any, params: any = {})
+
+Sends POST request to the server with provided path and params. Used to create an entity on the server.
+
+```js
+const api = new ApiWrapper({ baseApiUrl: 'https://my-server.com/v1/' });
+const r = await api.put('user/123', { name: 'Tom' }); // => PUT https://my-server.com/v1/user/123
+// r = {
+//   code: 0,
+//   data: [
+//     {
+//       id: 123,
+//       name: 'Tom'
+//     }
+//   ],
+//   errors: {}
+// }
+// or
+// r = {
+//   code: -20300,
+//   data: [],
+//   errors: {
+//     name: {
+//       errors: ['Such user already exists']
+//     }
+//   }
+// }
+```
+
+### delete(path: string, data: any = {}, params: any = {})
+
+Sends DELETE request to the server with provided path and params. Used to create an entity on the server.
+
+```js
+const api = new ApiWrapper({ baseApiUrl: 'https://my-server.com/v1/' });
+const r = await api.delete('user/123'); // => DELETE https://my-server.com/v1/user/123
+// r = {
+//   code: 0,
+//   data: [],
+//   errors: {}
+// }
+// or
+// r = {
+//   code: -20200,
+//   data: [],
+//   errors: {
+//     name: {
+//       errors: ['Cannot delete the user as it is not found']
+//     }
+//   }
+// }
+```

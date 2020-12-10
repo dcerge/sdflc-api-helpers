@@ -1,14 +1,14 @@
 import axios from 'axios';
 
 import { OP_RESULT_CODES } from './opresult-codes';
-import { HTTP_STATUES } from './http-codes';
+import { HTTP_STATUSES } from './http-codes';
 import { OpResult } from './opresult';
 
 export class ApiWrapper {
   /**
    * Absolute path to API server. For example: 'https://myapi.com/v1/'. Note that ending '/' is required.
    */
-  apiUrl: string = '';
+  baseApiUrl: string = '';
 
   /**
    * This is the function that will be called in case there was an exception on sending request.
@@ -72,25 +72,27 @@ export class ApiWrapper {
   }
 
   constructor(props?: any) {
-    const { urlBase, onException } = props || {};
-    this.apiUrl = `${urlBase || '/'}`;
+    const { baseApiUrl, onException } = props || {};
+    this.baseApiUrl = `${baseApiUrl || '/'}`;
     this.onException = onException || ApiWrapper.onExceptionFn;
   }
 
   /**
-   * In case of an error received from the server the function adds errors to OpResult object with some text description.
+   * This function is called upon receiving response from server (after calling `axios.request`) or on an exception. 
+   * By checking response code it adds error messages. The main purpose is to add some message in case 
+   * there was no correct response from the server. This is private function and should not be called manually.
    * @param {object} response is an object returned by `ApiWrapper.fetcnFn`
    * @param {object} result is an instance of OpResult object where the function adds error descriptions if any.
    * @return {object} returns the result param with added error description.
    */
-  postResult(response: any, result: OpResult) {
+  private postResult(response: any, result: OpResult) {
     if (!response) {
       result.setCode(OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.networkError);
-    } else if (response.status === HTTP_STATUES.HS_400_BAD_REQUEST) {
+    } else if (response.status === HTTP_STATUSES.HS_400_BAD_REQUEST) {
       result.setCode(OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.validationFailed);
-    } else if (response.status === HTTP_STATUES.HS_404_NOT_FOUND) {
+    } else if (response.status === HTTP_STATUSES.HS_404_NOT_FOUND) {
       result.setCode(OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.notFound);
-    } else if (response.status >= HTTP_STATUES.HS_300_MULTIPLE_CHOICE) {
+    } else if (response.status >= HTTP_STATUSES.HS_300_MULTIPLE_CHOICE) {
       result.setCode(OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.serverError);
     }
 
@@ -99,12 +101,12 @@ export class ApiWrapper {
 
   /**
    * Combines base API URL with relative path.
-   * For example, if base API URL (apiUrl) is 'http://myapi.com/v1/' and path 'projects' 
+   * For example, if base API URL (baseApiUrl) is 'http://myapi.com/v1/' and path 'projects' 
    * then the result will be 'http://myapi.com/v1/projects'.
    * @param {string} path path to add to base API url when making a request
    */
   private buildPath(path: string) {
-    return `${this.apiUrl}${path}`;
+    return `${this.baseApiUrl}${path}`;
   }
 
   /**
@@ -112,7 +114,7 @@ export class ApiWrapper {
    * This functions does not throw any exceptions. To check if request failed use OpResult's method `isFailed()`.
    * @param {object} props information needed to make a request: method, url, data, params.
    */
-  async doRequest(props: any) {
+  private async doRequest(props: any) {
     const { method, path, data, params } = props;
     const url = this.buildPath(path);
 
@@ -140,15 +142,15 @@ export class ApiWrapper {
     return this.doRequest({ method: 'get', path, params });
   }
 
-  async post(path: string, data?: any) {
-    return this.doRequest({ method: 'post', path, data });
+  async post(path: string, data?: any, params: any = {}) {
+    return this.doRequest({ method: 'post', path, data, params });
   }
 
-  async put(path: string, data?: any) {
-    return this.doRequest({ method: 'put', path, data });
+  async put(path: string, data?: any, params: any = {}) {
+    return this.doRequest({ method: 'put', path, data, params });
   }
 
-  async delete(path: string, data: any = {}) {
-    return this.doRequest({ method: 'delete', path, data });
+  async delete(path: string, data: any = {}, params: any = {}) {
+    return this.doRequest({ method: 'delete', path, data, params });
   }
 }
