@@ -5,7 +5,7 @@ This is a set of classes that help to organize communication between front end a
 # Classes overview
 
 - **OpResult** - this class represents an operation result that is expected by a front-end app and that should be sent by a server.
-- **ApiWrapper** - this class wraps `axios.request` method to do requests to a server and also wraps a resonse from server into `OpResult` class.
+- **ApiWrapper** - this class wraps `axios.request` method to do requests to a server and also wraps a response from server into `OpResult` class.
 
 # OpResult
 
