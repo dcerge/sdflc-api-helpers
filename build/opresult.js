@@ -76,7 +76,7 @@ var OpResult = /** @class */ (function () {
     OpResult.prototype.getCode = function () {
         return this.code;
     };
-    OpResult.prototype.addError = function (field, errorMessage) {
+    OpResult.prototype.addError = function (field, errorMessage, code) {
         var _a;
         var key = field || '';
         if (this.errors[key] === undefined) {
@@ -87,6 +87,9 @@ var OpResult = /** @class */ (function () {
                 _a);
         }
         this.errors[key].errors.push(errorMessage);
+        if (code != undefined && !isNaN(code)) {
+            this.code = code;
+        }
         return this;
     };
     OpResult.prototype.clearErrors = function () {
@@ -103,6 +106,9 @@ var OpResult = /** @class */ (function () {
     };
     OpResult.prototype.hasData = function () {
         return (this.data || []).length > 0 && this.data[0] != null && this.data[0] != undefined;
+    };
+    OpResult.prototype.hasErrors = function () {
+        return this.getErrorFields().length > 0;
     };
     OpResult.prototype.isSucceededAndHasData = function () {
         return this.code >= opresult_codes_1.OP_RESULT_CODES.OK && this.hasData();
@@ -153,7 +159,7 @@ var OpResult = /** @class */ (function () {
     OpResult.prototype.getDataFieldValue = function (fieldName, defaultValue) {
         if (defaultValue === void 0) { defaultValue = ''; }
         var data = (this.data instanceof Array ? this.data[0] : this.data) || {};
-        return typeof data[fieldName] === 'function' ? data[fieldName]() : data[fieldName] || defaultValue;
+        return typeof data[fieldName] === 'function' ? data[fieldName](data) : data[fieldName] || defaultValue;
     };
     OpResult.prototype.toJS = function () {
         return {

@@ -60,7 +60,7 @@ var ApiWrapper = /** @class */ (function () {
         /**
          * Absolute path to API server. For example: 'https://myapi.com/v1/'. Note that ending '/' is required.
          */
-        this.apiUrl = '';
+        this.baseApiUrl = '';
         /**
          * This is the function that will be called in case there was an exception on sending request.
          * An object with the following information will be passed to the function:
@@ -70,12 +70,14 @@ var ApiWrapper = /** @class */ (function () {
          * data
          */
         this.onException = null;
-        var _a = props || {}, urlBase = _a.urlBase, onException = _a.onException;
-        this.apiUrl = "" + (urlBase || '/');
+        var _a = props || {}, baseApiUrl = _a.baseApiUrl, onException = _a.onException;
+        this.baseApiUrl = "" + (baseApiUrl || '/');
         this.onException = onException || ApiWrapper.onExceptionFn;
     }
     /**
-     * In case of an error received from the server the function adds errors to OpResult object with some text description.
+     * This function is called upon receiving response from server (after calling `axios.request`) or on an exception.
+     * By checking response code it adds error messages. The main purpose is to add some message in case
+     * there was no correct response from the server. This is private function and should not be called manually.
      * @param {object} response is an object returned by `ApiWrapper.fetcnFn`
      * @param {object} result is an instance of OpResult object where the function adds error descriptions if any.
      * @return {object} returns the result param with added error description.
@@ -84,25 +86,25 @@ var ApiWrapper = /** @class */ (function () {
         if (!response) {
             result.setCode(opresult_codes_1.OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.networkError);
         }
-        else if (response.status === http_codes_1.HTTP_STATUES.HS_400_BAD_REQUEST) {
+        else if (response.status === http_codes_1.HTTP_STATUSES.HS_400_BAD_REQUEST) {
             result.setCode(opresult_codes_1.OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.validationFailed);
         }
-        else if (response.status === http_codes_1.HTTP_STATUES.HS_404_NOT_FOUND) {
+        else if (response.status === http_codes_1.HTTP_STATUSES.HS_404_NOT_FOUND) {
             result.setCode(opresult_codes_1.OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.notFound);
         }
-        else if (response.status >= http_codes_1.HTTP_STATUES.HS_300_MULTIPLE_CHOICE) {
+        else if (response.status >= http_codes_1.HTTP_STATUSES.HS_300_MULTIPLE_CHOICE) {
             result.setCode(opresult_codes_1.OP_RESULT_CODES.NETWORK_ERROR).addError('', ApiWrapper.messages.serverError);
         }
         return result;
     };
     /**
      * Combines base API URL with relative path.
-     * For example, if base API URL (apiUrl) is 'http://myapi.com/v1/' and path 'projects'
+     * For example, if base API URL (baseApiUrl) is 'http://myapi.com/v1/' and path 'projects'
      * then the result will be 'http://myapi.com/v1/projects'.
      * @param {string} path path to add to base API url when making a request
      */
     ApiWrapper.prototype.buildPath = function (path) {
-        return "" + this.apiUrl + path;
+        return "" + this.baseApiUrl + path;
     };
     /**
      * Does a request using `ApiWrapper.fetcnFn` and wraps received result into OpResult object.
@@ -145,25 +147,28 @@ var ApiWrapper = /** @class */ (function () {
             });
         });
     };
-    ApiWrapper.prototype.post = function (path, data) {
+    ApiWrapper.prototype.post = function (path, data, params) {
+        if (params === void 0) { params = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.doRequest({ method: 'post', path: path, data: data })];
+                return [2 /*return*/, this.doRequest({ method: 'post', path: path, data: data, params: params })];
             });
         });
     };
-    ApiWrapper.prototype.put = function (path, data) {
+    ApiWrapper.prototype.put = function (path, data, params) {
+        if (params === void 0) { params = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.doRequest({ method: 'put', path: path, data: data })];
+                return [2 /*return*/, this.doRequest({ method: 'put', path: path, data: data, params: params })];
             });
         });
     };
-    ApiWrapper.prototype.delete = function (path, data) {
+    ApiWrapper.prototype.delete = function (path, data, params) {
         if (data === void 0) { data = {}; }
+        if (params === void 0) { params = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.doRequest({ method: 'delete', path: path, data: data })];
+                return [2 /*return*/, this.doRequest({ method: 'delete', path: path, data: data, params: params })];
             });
         });
     };

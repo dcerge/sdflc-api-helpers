@@ -39,8 +39,6 @@ export class ApiWrapper {
   static fetcnFn: any = (props: any) => {
     const { method, url, data, params } = props;
 
-    console.log('fetchFn:', props);
-
     return axios.request({
       method,
       url, 

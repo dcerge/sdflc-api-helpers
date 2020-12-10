@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HTTP_STATUES = void 0;
+exports.HTTP_STATUSES = void 0;
 // HTTP Status codes list: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-var HTTP_STATUES = {
+var HTTP_STATUSES = {
     HS_100_CONTINUE: 100,
     HS_101_SWITCH_PROTOCOLS: 101,
     HS_102_PROCESSING: 102,
@@ -36,4 +36,4 @@ var HTTP_STATUES = {
     HS_503_SERVICE_UNAVAILABLE: 503,
     HS_504_GATEWAY_TIMEOUT: 504,
 };
-exports.HTTP_STATUES = HTTP_STATUES;
+exports.HTTP_STATUSES = HTTP_STATUSES;

@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HTTP_STATUES = exports.OP_RESULT_CODES = exports.ApiWrapper = exports.OpResult = void 0;
+exports.HTTP_STATUSES = exports.OP_RESULT_CODES = exports.ApiWrapper = exports.OpResult = void 0;
 var opresult_codes_1 = require("./opresult-codes");
 Object.defineProperty(exports, "OP_RESULT_CODES", { enumerable: true, get: function () { return opresult_codes_1.OP_RESULT_CODES; } });
 var http_codes_1 = require("./http-codes");
-Object.defineProperty(exports, "HTTP_STATUES", { enumerable: true, get: function () { return http_codes_1.HTTP_STATUES; } });
+Object.defineProperty(exports, "HTTP_STATUSES", { enumerable: true, get: function () { return http_codes_1.HTTP_STATUSES; } });
 var opresult_1 = require("./opresult");
 Object.defineProperty(exports, "OpResult", { enumerable: true, get: function () { return opresult_1.OpResult; } });
 var apiwrapper_1 = require("./apiwrapper");
