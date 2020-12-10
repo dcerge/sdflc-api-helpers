@@ -1,5 +1,5 @@
 // HTTP Status codes list: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-const HTTP_STATUES = {
+const HTTP_STATUSES = {
   HS_100_CONTINUE: 100,
   HS_101_SWITCH_PROTOCOLS: 101,
   HS_102_PROCESSING: 102,
@@ -34,4 +34,4 @@ const HTTP_STATUES = {
   HS_504_GATEWAY_TIMEOUT: 504,
 };
 
-export { HTTP_STATUES };
+export { HTTP_STATUSES };

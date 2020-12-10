@@ -119,4 +119,15 @@ test('Result Class Testing', () => {
 
   const withModels = new OpResult({ data: [{ name: 'SD', email: "sd@gmail.com"}, { name: 'EM', email: "em@gmail.com"}] }, { modelClass: User });
   expect(withModels.getData()).toEqual([{ name: 'SD', email: "sd@gmail.com"}, { name: 'EM', email: "em@gmail.com"}]);
+
+  const r = new OpResult();
+
+  r.setData({
+    firstName: 'John',
+    lastName: 'Smith',
+    fullName: (obj: any) => {
+      return `${obj.firstName} ${obj.lastName}`;
+    },
+  });
+  expect(r.getDataFieldValue('fullName')).toEqual('John Smith');
 });

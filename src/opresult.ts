@@ -71,7 +71,7 @@ export class OpResult {
     return this.code;
   }
 
-  addError(field: string, errorMessage: string) {
+  addError(field: string, errorMessage: string, code?: number) {
     const key = field || '';
 
     if (this.errors[key] === undefined) {
@@ -83,6 +83,10 @@ export class OpResult {
     }
 
     this.errors[key].errors.push(errorMessage);
+
+    if (code != undefined && !isNaN(code)) {
+      this.code = code;
+    }
 
     return this;
   }
@@ -110,6 +114,10 @@ export class OpResult {
 
   hasData() {
     return (this.data || []).length > 0 && this.data[0] != null && this.data[0] != undefined;
+  }
+
+  hasErrors() {
+    return this.getErrorFields().length > 0;
   }
 
   isSucceededAndHasData() {
@@ -173,7 +181,7 @@ export class OpResult {
 
   getDataFieldValue(fieldName: string, defaultValue: string = '') {
     const data = (this.data instanceof Array ? this.data[0] : this.data) || {};
-    return typeof data[fieldName] === 'function' ? data[fieldName]() : data[fieldName] || defaultValue;
+    return typeof data[fieldName] === 'function' ? data[fieldName](data) : data[fieldName] || defaultValue;
   }
 
   toJS() {
