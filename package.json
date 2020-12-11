@@ -4,7 +4,8 @@
   "description": "A set of classes that help to send api calls from front end and then then back from back end.",
   "main": "build/index.js",
   "scripts": {
-    "build": "rimraf ./build && tsc",
+    "build-orig": "rimraf ./build && tsc",
+    "build": "tsc",
     "start:dev": "nodemon",
     "start": "npm run build && node build/index.js",
     "lint": "eslint . --ext .ts",

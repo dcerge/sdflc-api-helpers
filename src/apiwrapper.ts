@@ -5,10 +5,17 @@ import { HTTP_STATUSES } from './http-codes';
 import { OpResult } from './opresult';
 
 export class ApiWrapper {
+  static defaultResultOptions = {};
+
   /**
    * Absolute path to API server. For example: 'https://myapi.com/v1/'. Note that ending '/' is required.
    */
   baseApiUrl: string = '';
+
+  /**
+   * Options to set to result object on fetching data.
+   */
+  resultOptions: any = ApiWrapper.defaultResultOptions;  
 
   /**
    * This is the function that will be called in case there was an exception on sending request.
@@ -19,6 +26,8 @@ export class ApiWrapper {
    * data
    */
   onException: any = null;
+
+  static defaultBaseApiUrl = '';
 
   /**
    * This is default props used when making a request.
@@ -70,8 +79,9 @@ export class ApiWrapper {
   }
 
   constructor(props?: any) {
-    const { baseApiUrl, onException } = props || {};
-    this.baseApiUrl = `${baseApiUrl || '/'}`;
+    const { baseApiUrl, onException, resultOptions } = props || {};
+    this.baseApiUrl = baseApiUrl || ApiWrapper.defaultBaseApiUrl;
+    this.resultOptions = resultOptions || ApiWrapper.defaultResultOptions;
     this.onException = onException || ApiWrapper.onExceptionFn;
   }
 
@@ -98,6 +108,16 @@ export class ApiWrapper {
   }
 
   /**
+   * Sets new API URL
+   * @param {string} baseApiUrl new value for api's absolute path
+   */
+  setBaseApiUrl(baseApiUrl: string) {
+    this.baseApiUrl = baseApiUrl;
+
+    return this;
+  }
+
+  /**
    * Combines base API URL with relative path.
    * For example, if base API URL (baseApiUrl) is 'http://myapi.com/v1/' and path 'projects' 
    * then the result will be 'http://myapi.com/v1/projects'.
@@ -109,7 +129,7 @@ export class ApiWrapper {
 
   /**
    * Does a request using `ApiWrapper.fetcnFn` and wraps received result into OpResult object.
-   * This functions does not throw any exceptions. To check if request failed use OpResult's method `isFailed()`.
+   * This functions does not throw any exceptions. To check if request failed use OpResult's method `didFail()`.
    * @param {object} props information needed to make a request: method, url, data, params.
    */
   private async doRequest(props: any) {
@@ -127,7 +147,7 @@ export class ApiWrapper {
         ...ApiWrapper.fetchFnOpts,
       });
 
-      const result = new OpResult(response.data);
+      const result = new OpResult(response.data, this.resultOptions);
 
       return this.postResult(response, result);
     } catch (exception) {
@@ -136,19 +156,19 @@ export class ApiWrapper {
     }
   }
 
-  async get(path: string, params: any) {
+  async get(path: string, params?: any) {
     return this.doRequest({ method: 'get', path, params });
   }
 
-  async post(path: string, data?: any, params: any = {}) {
+  async post(path: string, data?: any, params?: any) {
     return this.doRequest({ method: 'post', path, data, params });
   }
 
-  async put(path: string, data?: any, params: any = {}) {
+  async put(path: string, data?: any, params?: any) {
     return this.doRequest({ method: 'put', path, data, params });
   }
 
-  async delete(path: string, data: any = {}, params: any = {}) {
+  async delete(path: string, data?: any, params?: any) {
     return this.doRequest({ method: 'delete', path, data, params });
   }
 }

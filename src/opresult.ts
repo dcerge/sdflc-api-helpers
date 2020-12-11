@@ -1,13 +1,33 @@
 import { OP_RESULT_CODES, OP_RESULT_CODE_TO_HTTP_CODE } from './opresult-codes';
 
-const createData = (data: any, modelClass: any = null) => {
-  if (!data) {
+const createData = (props: any) => {
+  const { data, modelClass, transform, flatten } = props;
+  const doTransform = typeof transform === 'function';
+  const doFlatten = flatten !== false;
+
+  if (data === undefined) {
     return [];
-  } else if (Array.isArray(data)) {
-    return modelClass ? data.map((dataItem) => new modelClass(dataItem)) : data;
-  } else {
-    return [modelClass ? new modelClass(data) : data];
   }
+
+  const tmpData = !Array.isArray(data) ? [data] : data;
+
+  if (tmpData.length === 0) {
+    return [];
+  }
+
+  const arrData: any = [];
+
+  tmpData.forEach((item: any) => {
+    const transformed = doTransform ? transform(item) : item;
+
+    if (doFlatten && Array.isArray(transformed)) {
+      transformed.forEach((transformedItem: any) => arrData.push(transformedItem));
+    } else {
+      arrData.push(transformed);
+    }
+  });
+
+  return modelClass ? arrData.map((dataItem: any) => new modelClass(dataItem)) : arrData;
 };
 
 export class OpResult {
@@ -26,12 +46,16 @@ export class OpResult {
     if (!opt) {
       opt = {
         modelClass: null,
+        transform: null,
+        doFlatted: true
       };
     }
 
-    this.code = props.code || OP_RESULT_CODES.OK;
-    this.data = createData(props.data, opt.modelClass);
-    this.errors = props.errors || {};
+    const { code, data, errors } = props;
+
+    this.code = code || OP_RESULT_CODES.OK;
+    this.data = createData({ data, ...opt });
+    this.errors = errors || {};
     this.opt = opt;
   }
 
@@ -103,12 +127,14 @@ export class OpResult {
       modelClass
     };
 
-    this.data = createData(this.data, this.opt.modelClass);
+    const { data, opt } = this;
+
+    this.data = createData({ data, ...opt });
 
     return this;
   }
 
-  isSucceeded() {
+  didSucceed() {
     return this.code >= OP_RESULT_CODES.OK;
   }
 
@@ -120,11 +146,11 @@ export class OpResult {
     return this.getErrorFields().length > 0;
   }
 
-  isSucceededAndHasData() {
+  didSucceedAndHasData() {
     return this.code >= OP_RESULT_CODES.OK && this.hasData();
   }
 
-  isFailed() {
+  didFail() {
     return this.code < OP_RESULT_CODES.OK;
   }
 
@@ -211,11 +237,11 @@ export class OpResult {
   static ok(data?: any, opt?: any) {
     return new OpResult({
       code: OP_RESULT_CODES.OK,
-      data: createData(data, (opt || {}).modelClass),
+      data: createData({ data, ...opt })
     });
   }
 
-  static fail(code: number, data: any, message: string, opt?: any) {
+  static fail(code: number, data?: any, message?: string, opt?: any) {
     let errors = {};
 
     if (typeof message === 'object') {

@@ -62,6 +62,10 @@ var ApiWrapper = /** @class */ (function () {
          */
         this.baseApiUrl = '';
         /**
+         * Options to set to result object on fetching data.
+         */
+        this.resultOptions = ApiWrapper.defaultResultOptions;
+        /**
          * This is the function that will be called in case there was an exception on sending request.
          * An object with the following information will be passed to the function:
          * {string} method
@@ -70,8 +74,9 @@ var ApiWrapper = /** @class */ (function () {
          * data
          */
         this.onException = null;
-        var _a = props || {}, baseApiUrl = _a.baseApiUrl, onException = _a.onException;
-        this.baseApiUrl = "" + (baseApiUrl || '/');
+        var _a = props || {}, baseApiUrl = _a.baseApiUrl, onException = _a.onException, resultOptions = _a.resultOptions;
+        this.baseApiUrl = baseApiUrl || ApiWrapper.defaultBaseApiUrl;
+        this.resultOptions = resultOptions || ApiWrapper.defaultResultOptions;
         this.onException = onException || ApiWrapper.onExceptionFn;
     }
     /**
@@ -98,6 +103,14 @@ var ApiWrapper = /** @class */ (function () {
         return result;
     };
     /**
+     * Sets new API URL
+     * @param {string} baseApiUrl new value for api's absolute path
+     */
+    ApiWrapper.prototype.setBaseApiUrl = function (baseApiUrl) {
+        this.baseApiUrl = baseApiUrl;
+        return this;
+    };
+    /**
      * Combines base API URL with relative path.
      * For example, if base API URL (baseApiUrl) is 'http://myapi.com/v1/' and path 'projects'
      * then the result will be 'http://myapi.com/v1/projects'.
@@ -108,7 +121,7 @@ var ApiWrapper = /** @class */ (function () {
     };
     /**
      * Does a request using `ApiWrapper.fetcnFn` and wraps received result into OpResult object.
-     * This functions does not throw any exceptions. To check if request failed use OpResult's method `isFailed()`.
+     * This functions does not throw any exceptions. To check if request failed use OpResult's method `didFail()`.
      * @param {object} props information needed to make a request: method, url, data, params.
      */
     ApiWrapper.prototype.doRequest = function (props) {
@@ -129,7 +142,7 @@ var ApiWrapper = /** @class */ (function () {
                                 params: params }, ApiWrapper.fetchFnOpts))];
                     case 2:
                         response = _a.sent();
-                        result = new opresult_1.OpResult(response.data);
+                        result = new opresult_1.OpResult(response.data, this.resultOptions);
                         return [2 /*return*/, this.postResult(response, result)];
                     case 3:
                         exception_1 = _a.sent();
@@ -148,7 +161,6 @@ var ApiWrapper = /** @class */ (function () {
         });
     };
     ApiWrapper.prototype.post = function (path, data, params) {
-        if (params === void 0) { params = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, this.doRequest({ method: 'post', path: path, data: data, params: params })];
@@ -156,7 +168,6 @@ var ApiWrapper = /** @class */ (function () {
         });
     };
     ApiWrapper.prototype.put = function (path, data, params) {
-        if (params === void 0) { params = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, this.doRequest({ method: 'put', path: path, data: data, params: params })];
@@ -164,14 +175,14 @@ var ApiWrapper = /** @class */ (function () {
         });
     };
     ApiWrapper.prototype.delete = function (path, data, params) {
-        if (data === void 0) { data = {}; }
-        if (params === void 0) { params = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, this.doRequest({ method: 'delete', path: path, data: data, params: params })];
             });
         });
     };
+    ApiWrapper.defaultResultOptions = {};
+    ApiWrapper.defaultBaseApiUrl = '';
     /**
      * This is default props used when making a request.
      * You can override it globally if needed
@@ -189,7 +200,6 @@ var ApiWrapper = /** @class */ (function () {
      */
     ApiWrapper.fetcnFn = function (props) {
         var method = props.method, url = props.url, data = props.data, params = props.params;
-        console.log('fetchFn:', props);
         return axios_1.default.request(__assign({ method: method,
             url: url,
             data: data,

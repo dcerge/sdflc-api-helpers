@@ -12,7 +12,19 @@ var User = /** @class */ (function () {
     }
     return User;
 }());
-test('Result Class Testing', function () {
+var Login = /** @class */ (function () {
+    function Login(props) {
+        this.login = '';
+        this.email = '';
+        if (!props) {
+            props = {};
+        }
+        this.login = props.login;
+        this.email = props.email;
+    }
+    return Login;
+}());
+test('OpResult Class Testing', function () {
     var rawResult = {
         code: OP_RESULT_CODES.OK,
         data: [
@@ -74,18 +86,18 @@ test('Result Class Testing', function () {
     expect(result.getErrorSummary('')).toEqual('');
     var okeed = OpResult.ok(rawDataItem);
     expect(okeed.getDataFirst()).toEqual(rawDataItem);
-    expect(okeed.isSucceeded()).toEqual(true);
-    expect(okeed.isSucceededAndHasData()).toEqual(true);
-    expect(okeed.isFailed()).toEqual(false);
+    expect(okeed.didSucceed()).toEqual(true);
+    expect(okeed.didSucceedAndHasData()).toEqual(true);
+    expect(okeed.didFail()).toEqual(false);
     expect(okeed.hasData()).toEqual(true);
     expect(okeed.getHttpStatus()).toEqual(200);
     okeed.setData(null);
     expect(okeed.getHttpStatus()).toEqual(204);
     var failed = OpResult.fail(OP_RESULT_CODES.FORBIDDEN, null, 'Access forbidden');
     expect(failed.getErrorSummary('')).toEqual('Access forbidden');
-    expect(failed.isSucceeded()).toEqual(false);
-    expect(failed.isSucceededAndHasData()).toEqual(false);
-    expect(failed.isFailed()).toEqual(true);
+    expect(failed.didSucceed()).toEqual(false);
+    expect(failed.didSucceedAndHasData()).toEqual(false);
+    expect(failed.didFail()).toEqual(true);
     expect(failed.hasData()).toEqual(false);
     expect(failed.getErrorFields()).toEqual(['']);
     expect(failed.getFieldErrors('')).toEqual(['Access forbidden']);
@@ -104,4 +116,12 @@ test('Result Class Testing', function () {
         },
     });
     expect(r.getDataFieldValue('fullName')).toEqual('John Smith');
+    var transform = function (obj) {
+        return {
+            login: obj.name,
+            email: obj.email
+        };
+    };
+    var withTransform = new OpResult({ data: [{ name: 'SD', email: "sd@gmail.com" }, { name: 'EM', email: "em@gmail.com" }] }, { modelClass: Login, transform: transform });
+    expect(withTransform.getData()).toEqual([{ login: 'SD', email: "sd@gmail.com" }, { login: 'EM', email: "em@gmail.com" }]);
 });

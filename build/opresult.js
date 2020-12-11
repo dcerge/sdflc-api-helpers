@@ -13,17 +13,28 @@ var __assign = (this && this.__assign) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OpResult = void 0;
 var opresult_codes_1 = require("./opresult-codes");
-var createData = function (data, modelClass) {
-    if (modelClass === void 0) { modelClass = null; }
-    if (!data) {
+var createData = function (props) {
+    var data = props.data, modelClass = props.modelClass, transform = props.transform, flatten = props.flatten;
+    var doTransform = typeof transform === 'function';
+    var doFlatten = flatten !== false;
+    if (data === undefined) {
         return [];
     }
-    else if (Array.isArray(data)) {
-        return modelClass ? data.map(function (dataItem) { return new modelClass(dataItem); }) : data;
+    var tmpData = !Array.isArray(data) ? [data] : data;
+    if (tmpData.length === 0) {
+        return [];
     }
-    else {
-        return [modelClass ? new modelClass(data) : data];
-    }
+    var arrData = [];
+    tmpData.forEach(function (item) {
+        var transformed = doTransform ? transform(item) : item;
+        if (doFlatten && Array.isArray(transformed)) {
+            transformed.forEach(function (transformedItem) { return arrData.push(transformedItem); });
+        }
+        else {
+            arrData.push(transformed);
+        }
+    });
+    return modelClass ? arrData.map(function (dataItem) { return new modelClass(dataItem); }) : arrData;
 };
 var OpResult = /** @class */ (function () {
     function OpResult(props, opt) {
@@ -37,11 +48,14 @@ var OpResult = /** @class */ (function () {
         if (!opt) {
             opt = {
                 modelClass: null,
+                transform: null,
+                doFlatted: true
             };
         }
-        this.code = props.code || opresult_codes_1.OP_RESULT_CODES.OK;
-        this.data = createData(props.data, opt.modelClass);
-        this.errors = props.errors || {};
+        var code = props.code, data = props.data, errors = props.errors;
+        this.code = code || opresult_codes_1.OP_RESULT_CODES.OK;
+        this.data = createData(__assign({ data: data }, opt));
+        this.errors = errors || {};
         this.opt = opt;
     }
     /**
@@ -98,10 +112,11 @@ var OpResult = /** @class */ (function () {
     };
     OpResult.prototype.applyModelClass = function (modelClass) {
         this.opt = __assign(__assign({}, this.opt), { modelClass: modelClass });
-        this.data = createData(this.data, this.opt.modelClass);
+        var _a = this, data = _a.data, opt = _a.opt;
+        this.data = createData(__assign({ data: data }, opt));
         return this;
     };
-    OpResult.prototype.isSucceeded = function () {
+    OpResult.prototype.didSucceed = function () {
         return this.code >= opresult_codes_1.OP_RESULT_CODES.OK;
     };
     OpResult.prototype.hasData = function () {
@@ -110,10 +125,10 @@ var OpResult = /** @class */ (function () {
     OpResult.prototype.hasErrors = function () {
         return this.getErrorFields().length > 0;
     };
-    OpResult.prototype.isSucceededAndHasData = function () {
+    OpResult.prototype.didSucceedAndHasData = function () {
         return this.code >= opresult_codes_1.OP_RESULT_CODES.OK && this.hasData();
     };
-    OpResult.prototype.isFailed = function () {
+    OpResult.prototype.didFail = function () {
         return this.code < opresult_codes_1.OP_RESULT_CODES.OK;
     };
     OpResult.prototype.isLoading = function () {
@@ -183,7 +198,7 @@ var OpResult = /** @class */ (function () {
     OpResult.ok = function (data, opt) {
         return new OpResult({
             code: opresult_codes_1.OP_RESULT_CODES.OK,
-            data: createData(data, (opt || {}).modelClass),
+            data: createData(__assign({ data: data }, opt))
         });
     };
     OpResult.fail = function (code, data, message, opt) {

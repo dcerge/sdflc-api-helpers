@@ -133,7 +133,7 @@ The `errors` property is an object that contains information about errors occure
   },
   otherName: {
     errors: [
-      'v error description',
+      'otherName error description',
       'You can add several errors for the otherName'
     ]
   }
@@ -156,7 +156,7 @@ Contructor accepts props that are expected to look like:
 }
 ```
 
-Setting the class properties via constructor works best when you receive result object from server and need to initialize OpResult accordingly.
+Setting the class properties via constructor works best when you receive result object from server and need to initialize `OpResult` accordingly.
 
 #### Example
 
