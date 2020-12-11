@@ -78,7 +78,8 @@ var ApiDataList = /** @class */ (function () {
      * but rather be wrapped in a new object. This helps to work with redux.
      */
     ApiDataList.prototype.clone = function () {
-        return new ApiDataList(this);
+        var _a = this, mode = _a.mode, modelClass = _a.modelClass, params = _a.params, transform = _a.transform;
+        return new ApiDataList({ baseApiUrl: this.api.baseApiUrl, mode: mode, modelClass: modelClass, params: params, transform: transform });
     };
     /**
      * Sets object state, ie page, loaded items, etc.
@@ -90,12 +91,13 @@ var ApiDataList = /** @class */ (function () {
         }
         this.state = {
             currentPage: state.currentPage || ApiDataList.defaultState.currentPage,
-            pages: state.pages || ApiDataList.defaultState.pages,
+            pages: state.pages || __assign({}, ApiDataList.defaultState.pages),
             result: new opresult_1.OpResult(null, { modelClass: this.modelClass }),
             loadedCnt: state.loadedCnt || ApiDataList.defaultState.loadedCnt,
             totalCnt: state.loadedCnt || ApiDataList.defaultState.totalCnt,
             allRead: false
         };
+        return this;
     };
     /**
      * Used to convert orderBy object into a string to be sent to the server API.
@@ -128,7 +130,7 @@ var ApiDataList = /** @class */ (function () {
      * Resets state, ie removes all read pages, sets page to 1, etc.
      */
     ApiDataList.prototype.resetState = function () {
-        this.state = __assign({}, ApiDataList.defaultState);
+        return this.setState();
     };
     /**
      * Sets absolute API URL to the ApiWrapper object.
@@ -147,8 +149,7 @@ var ApiDataList = /** @class */ (function () {
             var _a = this, modelClass = _a.modelClass, transform = _a.transform;
             this.api = new apiwrapper_1.ApiWrapper({ baseApiUrl: baseApiUrl, resultOptions: { modelClass: modelClass, transform: transform } });
         }
-        this.resetState();
-        return this;
+        return this.resetState();
     };
     /**
      * Sets modelClass which is used as received list items initialized.
@@ -157,8 +158,7 @@ var ApiDataList = /** @class */ (function () {
      */
     ApiDataList.prototype.setModelClass = function (modelClass) {
         this.modelClass = modelClass;
-        this.resetState();
-        return this;
+        return this.resetState();
     };
     /**
      * Sets fetch mode to one of the following:
@@ -177,8 +177,7 @@ var ApiDataList = /** @class */ (function () {
      */
     ApiDataList.prototype.setParams = function (params) {
         this.params = params;
-        this.resetState();
-        return this;
+        return this.resetState();
     };
     /**
      * Returns current parameters.
@@ -192,8 +191,7 @@ var ApiDataList = /** @class */ (function () {
      */
     ApiDataList.prototype.setPageSize = function (pageSize) {
         this.params.pageSize = pageSize;
-        this.resetState();
-        return this;
+        return this.resetState();
     };
     /**
      * Processes orderBy property:
@@ -222,8 +220,7 @@ var ApiDataList = /** @class */ (function () {
      */
     ApiDataList.prototype.setOrderBy = function (orderBy) {
         this.params.orderBy = this.processOrderBy(orderBy);
-        this.resetState();
-        return this;
+        return this.resetState();
     };
     /**
      * Toggles (asc/desc) orderBy property for provided field. If no field provided it toggles all fields in orderBy.
@@ -237,8 +234,7 @@ var ApiDataList = /** @class */ (function () {
         var orderBy = this.params.orderBy;
         if (!key) {
             Object.keys(orderBy).forEach(function (item) { return _this.toggleOrderBy(item, false); });
-            this.resetState();
-            return this;
+            return this.resetState();
         }
         var order = orderBy[key];
         if (order === 'asc') {

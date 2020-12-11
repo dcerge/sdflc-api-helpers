@@ -69,26 +69,29 @@ export class ApiDataList {
    * but rather be wrapped in a new object. This helps to work with redux.
    */
   clone() {
-    return new ApiDataList(this);
+    const { mode, modelClass, params, transform } = this;
+    return new ApiDataList({ baseApiUrl: this.api.baseApiUrl, mode, modelClass, params, transform });
   }
 
   /**
    * Sets object state, ie page, loaded items, etc.
    * @param {any} state state to set to the object
    */
-  private setState(state: any) {
+  private setState(state?: any) {
     if (!state) {
       state = {};
     }
 
     this.state = {
       currentPage: state.currentPage || ApiDataList.defaultState.currentPage,
-      pages: state.pages || ApiDataList.defaultState.pages,
+      pages: state.pages || { ... ApiDataList.defaultState.pages },
       result: new OpResult(null, { modelClass: this.modelClass }),
       loadedCnt: state.loadedCnt || ApiDataList.defaultState.loadedCnt,
       totalCnt: state.loadedCnt || ApiDataList.defaultState.totalCnt,
       allRead: false
     };
+
+    return this;
   }
 
   /**
@@ -129,9 +132,7 @@ export class ApiDataList {
    * Resets state, ie removes all read pages, sets page to 1, etc.
    */
   resetState() {
-    this.state = {
-      ...ApiDataList.defaultState
-    };
+    return this.setState();
   }
 
   /**
@@ -150,9 +151,7 @@ export class ApiDataList {
       this.api = new ApiWrapper({ baseApiUrl, resultOptions: { modelClass, transform } });
     }
 
-    this.resetState();
-
-    return this;
+    return this.resetState();
   }
 
   /**
@@ -162,9 +161,8 @@ export class ApiDataList {
    */
   setModelClass(modelClass: null) {
     this.modelClass = modelClass;
-    this.resetState();
 
-    return this;
+    return this.resetState();
   }
 
   /**
@@ -186,9 +184,8 @@ export class ApiDataList {
    */
   setParams(params: any) {
     this.params = params;
-    this.resetState();
 
-    return this;
+    return this.resetState();
   }
 
   /**
@@ -204,8 +201,8 @@ export class ApiDataList {
    */
   setPageSize(pageSize: number) {
     this.params.pageSize = pageSize;
-    this.resetState();
-    return this;
+    
+    return this.resetState();
   }
 
   /**
@@ -234,9 +231,8 @@ export class ApiDataList {
    */
   setOrderBy(orderBy: any) {
     this.params.orderBy = this.processOrderBy(orderBy);
-    this.resetState();
 
-    return this;
+    return this.resetState();
   }
 
   /**
@@ -250,8 +246,8 @@ export class ApiDataList {
 
     if (!key) {
       Object.keys(orderBy).forEach(item => this.toggleOrderBy(item, false));
-      this.resetState();
-      return this;
+
+      return this.resetState();
     }
 
     let order = orderBy[key];
