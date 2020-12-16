@@ -181,8 +181,8 @@ var ApiWrapper = /** @class */ (function () {
             });
         });
     };
-    ApiWrapper.defaultResultOptions = {};
     ApiWrapper.defaultBaseApiUrl = '';
+    ApiWrapper.defaultResultOptions = {};
     /**
      * This is default props used when making a request.
      * You can override it globally if needed

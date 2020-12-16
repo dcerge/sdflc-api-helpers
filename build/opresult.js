@@ -40,6 +40,7 @@ var OpResult = /** @class */ (function () {
     function OpResult(props, opt) {
         this.code = opresult_codes_1.OP_RESULT_CODES.OK;
         this.data = null;
+        this.total = 1;
         this.errors = null;
         this.opt = {};
         if (!props) {
@@ -89,6 +90,13 @@ var OpResult = /** @class */ (function () {
     };
     OpResult.prototype.getCode = function () {
         return this.code;
+    };
+    OpResult.prototype.setTotal = function (total) {
+        this.total = !isNaN(total) && total >= 0 ? total : 0;
+        return this;
+    };
+    OpResult.prototype.getTotal = function () {
+        return this.total;
     };
     OpResult.prototype.addError = function (field, errorMessage, code) {
         var _a;
@@ -180,7 +188,8 @@ var OpResult = /** @class */ (function () {
         return {
             code: this.code,
             data: this.data,
-            errors: this.errors
+            total: this.total,
+            errors: this.errors,
         };
     };
     OpResult.prototype.toJSON = function () {
@@ -228,10 +237,7 @@ var OpResult = /** @class */ (function () {
         if (exception instanceof OpResult) {
             return new OpResult(exception);
         }
-        return new OpResult({
-            code: opresult_codes_1.OP_RESULT_CODES.EXCEPTION,
-            data: exception,
-        });
+        return new OpResult().setCode(opresult_codes_1.OP_RESULT_CODES.EXCEPTION).addError('', exception.message);
     };
     OpResult.asException = function (exceptionMsg) {
         return new OpResult().setCode(opresult_codes_1.OP_RESULT_CODES.EXCEPTION).addError('', exceptionMsg);

@@ -5,7 +5,18 @@ import { HTTP_STATUSES } from './http-codes';
 import { OpResult } from './opresult';
 
 export class ApiWrapper {
+  static defaultBaseApiUrl = '';
   static defaultResultOptions = {};
+
+  /**
+   * This is default props used when making a request.
+   * You can override it globally if needed
+   */
+  static fetchFnOpts: any = {
+    withCredentials: true, // whether or not cross-site Access-Control requests
+                           // should be made using credentials
+    timeout: 0,            // Timeout to wait for a response in ms
+  };
 
   /**
    * Absolute path to API server. For example: 'https://myapi.com/v1/'. Note that ending '/' is required.
@@ -26,18 +37,6 @@ export class ApiWrapper {
    * data
    */
   onException: any = null;
-
-  static defaultBaseApiUrl = '';
-
-  /**
-   * This is default props used when making a request.
-   * You can override it globally if needed
-   */
-  static fetchFnOpts: any = {
-    withCredentials: true, // whether or not cross-site Access-Control requests
-                           // should be made using credentials
-    timeout: 0,            // Timeout to wait for a response in ms
-  };
 
   /**
    * The function is wrapper around axois.request function to send requests.
@@ -76,7 +75,7 @@ export class ApiWrapper {
     notFound: 'API entry point was not found. Please contact support.',
     serverError: 'The server responded with an error',
     exception: 'An exception has occured when making a request: '
-  }
+  };
 
   constructor(props?: any) {
     const { baseApiUrl, onException, resultOptions } = props || {};

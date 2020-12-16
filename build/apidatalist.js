@@ -174,10 +174,44 @@ var ApiDataList = /** @class */ (function () {
     /**
      * Sets parameters to send to the server. Parameters is what added after '?' in URL.
      * @param params to be send to the server along with API call.
+     * @param {boolean} reset if specified and true then resets inner state
      */
-    ApiDataList.prototype.setParams = function (params) {
+    ApiDataList.prototype.setParams = function (params, reset) {
         this.params = params;
-        return this.resetState();
+        return reset === true ? this.resetState() : this;
+    };
+    /**
+     * Appends specified parameters with existing parameters and resets current internal state.
+     * @param params to be added or replaced to existing parameters
+     * @param {boolean} reset if specified and true then resets inner state
+     */
+    ApiDataList.prototype.appendParams = function (params, reset) {
+        this.params = __assign(__assign({}, this.params), params);
+        return reset === true ? this.resetState() : this;
+    };
+    /**
+     * Removes parameters by provided list of names.
+     * @param {string[]} keys array of params props names to remove.
+     * @param {boolean} reset if specified and true then resets inner state
+     */
+    ApiDataList.prototype.removeParams = function (keys, reset) {
+        var _this = this;
+        var newParams = Object.keys(this.params || {})
+            .filter(function (key) { return keys.indexOf(key) === -1; })
+            .reduce(function (obj, key) {
+            obj[key] = _this.params[key];
+            return obj;
+        }, {});
+        this.params = __assign({}, newParams);
+        return reset === true ? this.resetState() : this;
+    };
+    /**
+     * Removes currents parameters and resets current internal state.
+     * @param {boolean} reset if specified and true then resets inner state
+     */
+    ApiDataList.prototype.resetParams = function (reset) {
+        this.params = null;
+        return reset === true ? this.resetState() : this;
     };
     /**
      * Returns current parameters.
@@ -187,11 +221,12 @@ var ApiDataList = /** @class */ (function () {
     };
     /**
      * Sets pageSize which is number of items to request from the server when making API call.
-     * @param pageSize amount of items to request when making API call.
+     * @param {number} pageSize amount of items to request when making API call.
+     * @param {boolean} reset if specified and true then resets inner state
      */
-    ApiDataList.prototype.setPageSize = function (pageSize) {
+    ApiDataList.prototype.setPageSize = function (pageSize, reset) {
         this.params.pageSize = pageSize;
-        return this.resetState();
+        return reset === true ? this.resetState() : this;
     };
     /**
      * Processes orderBy property:
@@ -216,25 +251,25 @@ var ApiDataList = /** @class */ (function () {
     };
     /**
      * Sets new orderBy property.
-     * @param orderBy object or string to be set to orderBy property.
+     * @param {object|string} orderBy object or string to be set to orderBy property.
+     * @param {boolean} reset if specified and true then resets inner state
      */
-    ApiDataList.prototype.setOrderBy = function (orderBy) {
+    ApiDataList.prototype.setOrderBy = function (orderBy, reset) {
         this.params.orderBy = this.processOrderBy(orderBy);
-        return this.resetState();
+        return reset === true ? this.resetState() : this;
     };
     /**
      * Toggles (asc/desc) orderBy property for provided field. If no field provided it toggles all fields in orderBy.
-     * @param key name of field (key) to toggle asc <=> desc.
-     * @param resetState specified if resetting state is needed after toggling.
+     * @param {string} key name of field (key) to toggle asc <=> desc.
+     * @param {boolean?} reset specified if resetting state is needed after toggling.
      */
-    ApiDataList.prototype.toggleOrderBy = function (key, resetState) {
+    ApiDataList.prototype.toggleOrderBy = function (key, reset) {
         var _this = this;
-        if (resetState === void 0) { resetState = true; }
         var newOrder = '';
         var orderBy = this.params.orderBy;
         if (!key) {
             Object.keys(orderBy).forEach(function (item) { return _this.toggleOrderBy(item, false); });
-            return this.resetState();
+            return reset === true ? this.resetState() : this;
         }
         var order = orderBy[key];
         if (order === 'asc') {
@@ -246,10 +281,7 @@ var ApiDataList = /** @class */ (function () {
         if (newOrder) {
             orderBy[key] = newOrder;
         }
-        if (resetState) {
-            this.resetState();
-        }
-        return this;
+        return reset === true ? this.resetState() : this;
     };
     /**
      * Sets new page number. If page less than zero sets it as zero.
@@ -384,24 +416,33 @@ var ApiDataList = /** @class */ (function () {
         }, []);
         return items;
     };
+    /**
+     * Sets loading state to the inner state OpResult object. This may be used to change UI accordingly to let a user know that list is being loaded.
+     */
     ApiDataList.prototype.startLoading = function () {
         this.state.result.startLoading();
         return this;
     };
     /**
-     * Returns true if the request is still in progress
+     * Returns true if the request is still in progress.
      */
     ApiDataList.prototype.isLoading = function () {
         return this.state.result.isLoading();
     };
     /**
-     * Returns true if the request failed
+     * Returns true if the request succeeded.
+     */
+    ApiDataList.prototype.didSucceed = function () {
+        return this.state.result.didSucceed();
+    };
+    /**
+     * Returns true if the request failed.
      */
     ApiDataList.prototype.didFail = function () {
         return this.state.result.didFail();
     };
     /**
-     * Returns request result
+     * Returns request result as OpResult object.
      */
     ApiDataList.prototype.getResult = function () {
         return this.state.result;

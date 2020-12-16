@@ -33,6 +33,7 @@ const createData = (props: any) => {
 export class OpResult {
   code: number = OP_RESULT_CODES.OK;
   data: any = null;
+  total: number = 1;
   errors: any = null;
 
   private opt?: any  = {};
@@ -93,6 +94,15 @@ export class OpResult {
 
   getCode() {
     return this.code;
+  }
+
+  setTotal(total: number) {
+    this.total = !isNaN(total) && total >= 0 ? total : 0;
+    return this;
+  }
+
+  getTotal() {
+    return this.total;
   }
 
   addError(field: string, errorMessage: string, code?: number) {
@@ -214,7 +224,8 @@ export class OpResult {
     return {
       code: this.code,
       data: this.data,
-      errors: this.errors
+      total: this.total,
+      errors: this.errors,      
     };
   }
 
@@ -272,10 +283,7 @@ export class OpResult {
       return new OpResult(exception);
     }
 
-    return new OpResult({
-      code: OP_RESULT_CODES.EXCEPTION,
-      data: exception,
-    });
+    return new OpResult().setCode(OP_RESULT_CODES.EXCEPTION).addError('', exception.message);
   }
 
   static asException(exceptionMsg: string) {

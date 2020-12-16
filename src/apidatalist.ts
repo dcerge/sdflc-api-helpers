@@ -68,7 +68,7 @@ export class ApiDataList {
    * Create clone of the object. Note this is shallow cloning and all the pages data will not be cloned 
    * but rather be wrapped in a new object. This helps to work with redux.
    */
-  clone() {
+  public clone() {
     const { mode, modelClass, params, transform } = this;
     return new ApiDataList({ baseApiUrl: this.api.baseApiUrl, mode, modelClass, params, transform });
   }
@@ -131,7 +131,7 @@ export class ApiDataList {
   /**
    * Resets state, ie removes all read pages, sets page to 1, etc.
    */
-  resetState() {
+  public resetState() {
     return this.setState();
   }
 
@@ -139,7 +139,7 @@ export class ApiDataList {
    * Sets absolute API URL to the ApiWrapper object.
    * @param baseApiUrl Absolute API URL to use when making API calls.
    */
-  setBaseUrl(baseApiUrl: string) {
+  public setBaseUrl(baseApiUrl: string) {
     if (this.api) {
       if (baseApiUrl) {
         this.api.setBaseApiUrl(baseApiUrl);
@@ -159,7 +159,7 @@ export class ApiDataList {
    * It may be needed to conver anonymous objects to required class.
    * @param modelClass 
    */
-  setModelClass(modelClass: null) {
+  public setModelClass(modelClass: any) {
     this.modelClass = modelClass;
 
     return this.resetState();
@@ -172,7 +172,7 @@ export class ApiDataList {
    * - BACK - decrease page number before making API call to fetch list. If page is 1 then return error.
    * @param mode specifies the way how to change page number on each fetch call.
    */
-  setMode(mode: string) {
+  public setMode(mode: string) {
     this.mode = mode;
 
     return this;
@@ -181,28 +181,75 @@ export class ApiDataList {
   /**
    * Sets parameters to send to the server. Parameters is what added after '?' in URL. 
    * @param params to be send to the server along with API call.
+   * @param {boolean} reset if specified and true then resets inner state
    */
-  setParams(params: any) {
+  public setParams(params: any, reset?: boolean) {
     this.params = params;
 
-    return this.resetState();
+    return reset === true ? this.resetState() : this;
+  }
+
+  /**
+   * Appends specified parameters with existing parameters and resets current internal state.
+   * @param params to be added or replaced to existing parameters
+   * @param {boolean} reset if specified and true then resets inner state
+   */
+  public appendParams(params: any, reset?: boolean) {
+    this.params = {
+      ...this.params,
+      ...params
+    };
+
+    return reset === true ? this.resetState() : this;
+  }
+
+  /**
+   * Removes parameters by provided list of names.
+   * @param {string[]} keys array of params props names to remove.
+   * @param {boolean} reset if specified and true then resets inner state
+   */
+  public removeParams(keys: string[], reset?: boolean) {
+    const newParams = Object.keys(this.params|| {})
+      .filter((key: string) => keys.indexOf(key) === -1)
+      .reduce((obj: any, key: string) => {
+        obj[key] = this.params[key];
+
+        return obj;
+      }, {});
+
+    this.params = {
+      ...newParams
+    };
+
+    return reset === true ? this.resetState() : this;
+  }
+
+  /**
+   * Removes currents parameters and resets current internal state.
+   * @param {boolean} reset if specified and true then resets inner state
+   */
+  public resetParams(reset?: boolean) {
+    this.params = null;
+
+    return reset === true ? this.resetState() : this;
   }
 
   /**
    * Returns current parameters.
    */
-  getParams() {
+  public getParams() {
     return this.params;
   }
 
   /**
    * Sets pageSize which is number of items to request from the server when making API call.
-   * @param pageSize amount of items to request when making API call.
+   * @param {number} pageSize amount of items to request when making API call.
+   * @param {boolean} reset if specified and true then resets inner state
    */
-  setPageSize(pageSize: number) {
+  public setPageSize(pageSize: number, reset?: boolean) {
     this.params.pageSize = pageSize;
     
-    return this.resetState();
+    return reset === true ? this.resetState() : this;
   }
 
   /**
@@ -227,27 +274,28 @@ export class ApiDataList {
 
   /**
    * Sets new orderBy property.
-   * @param orderBy object or string to be set to orderBy property.
+   * @param {object|string} orderBy object or string to be set to orderBy property.
+   * @param {boolean} reset if specified and true then resets inner state
    */
-  setOrderBy(orderBy: any) {
+  public setOrderBy(orderBy: object|string, reset?: boolean) {
     this.params.orderBy = this.processOrderBy(orderBy);
 
-    return this.resetState();
+    return reset === true ? this.resetState() : this;
   }
 
   /**
    * Toggles (asc/desc) orderBy property for provided field. If no field provided it toggles all fields in orderBy.
-   * @param key name of field (key) to toggle asc <=> desc.
-   * @param resetState specified if resetting state is needed after toggling.
+   * @param {string} key name of field (key) to toggle asc <=> desc.
+   * @param {boolean?} reset specified if resetting state is needed after toggling.
    */
-  toggleOrderBy(key: string, resetState: boolean = true) {
+  public toggleOrderBy(key: string, reset?: boolean) {
     let newOrder = '';
     const { orderBy } = this.params;
 
     if (!key) {
       Object.keys(orderBy).forEach(item => this.toggleOrderBy(item, false));
 
-      return this.resetState();
+      return reset === true ? this.resetState() : this;
     }
 
     let order = orderBy[key];
@@ -262,18 +310,14 @@ export class ApiDataList {
       orderBy[key] = newOrder;
     }
 
-    if (resetState) {
-      this.resetState();
-    }
-
-    return this;
+    return reset === true ? this.resetState() : this;
   }
 
   /**
    * Sets new page number. If page less than zero sets it as zero.
    * @param page speficies page number to set.
    */
-  setPage(page: number) {
+  public setPage(page: number) {
     if (page < 0) {
       page = 0;
     }
@@ -286,7 +330,7 @@ export class ApiDataList {
   /**
    * Increases page number by one.
    */
-  toNextPage() {
+  public toNextPage() {
     this.setPage(this.state.currentPage + 1);
 
     return this;
@@ -295,7 +339,7 @@ export class ApiDataList {
   /**
    * Decreases page number by one.
    */
-  toPrevPage() {
+  public toPrevPage() {
     this.setPage(this.state.currentPage - 1);
 
     return this;
@@ -304,7 +348,7 @@ export class ApiDataList {
   /**
    * Returns curent page number.
    */
-  getPage() {
+  public getPage() {
     return  this.state.currentPage;
   }
 
@@ -314,7 +358,7 @@ export class ApiDataList {
    * - mode is forward and allRead is not true.
    * - mode is backward and page number is more than one.
    */
-  canFetchMode() {
+  public canFetchMode() {
     return (this.mode === API_DATALIST_FETCH_MODES.FORWARD && !this.state.allRead) 
       || (this.mode === API_DATALIST_FETCH_MODES.BACK && this.state.currentPage > 1);
   }
@@ -325,7 +369,7 @@ export class ApiDataList {
    * @param path relative path added to API URL.
    * @returns OpResult result of fetch list operation.
    */
-  async fetchList(path: string = '') {
+  public async fetchList(path: string = '') {
     let page = this.state.currentPage;
 
     switch (this.mode) {
@@ -389,7 +433,7 @@ export class ApiDataList {
   /**
    * Returns pages count requested by this moment.
    */
-  getTotalPages() {
+  public getTotalPages() {
     return Object.keys(this.state.pages).length;
   }
 
@@ -397,7 +441,7 @@ export class ApiDataList {
    * Returns items for specified page or for current page.
    * @param page 
    */
-  getPageItems(page: number = -1) {
+  public getPageItems(page: number = -1) {
     const items = this.state.pages[page];
     return Array.isArray(items) ? items : [];
   }
@@ -405,7 +449,7 @@ export class ApiDataList {
   /**
    * Returns items for all pages requested by this moment.
    */
-  getItems() {
+  public getItems() {
     const { pages } = this.state;
     const pagesKeys: any[] = Object.keys(pages);
 
@@ -420,27 +464,37 @@ export class ApiDataList {
     return items;
   }
 
+  /**
+   * Sets loading state to the inner state OpResult object. This may be used to change UI accordingly to let a user know that list is being loaded.
+   */
   public startLoading() {
     this.state.result.startLoading();
     return this;
   }
 
   /**
-   * Returns true if the request is still in progress
+   * Returns true if the request is still in progress.
    */
   public isLoading() {
     return this.state.result.isLoading();
   }
 
   /**
-   * Returns true if the request failed
+   * Returns true if the request succeeded.
+   */
+  public didSucceed() {
+    return this.state.result.didSucceed();
+  }
+
+  /**
+   * Returns true if the request failed.
    */
   public didFail() {
     return this.state.result.didFail();
   }
 
   /**
-   * Returns request result
+   * Returns request result as OpResult object.
    */
   public getResult() {
     return this.state.result;

@@ -6,6 +6,7 @@ This is a set of classes that help to organize communication between front end a
 
 - **OpResult** - this class represents an operation result that is expected by a front-end app and that should be sent by a server.
 - **ApiWrapper** - this class wraps `axios.request` method to do requests to a server and also wraps a response from server into `OpResult` class.
+- **ApiDataList** - this class used to simplify fetching paginated lists of objects from the server. It expects the server sends data as `OpResult` structure.
 
 # OpResult
 
@@ -666,3 +667,195 @@ const r = await api.delete('user/123'); // => DELETE https://my-server.com/v1/us
 //   }
 // }
 ```
+
+# ApiDataList
+
+The helper class helps to simplify fetching paginated lists of objects from the server providing the server sends data using `OpResult` structure. The class uses both `ApiWrapper` and `OpResult` in its operation. Fetched pages are cached in the memory.
+
+## Constructor and methods
+
+### constructor(props: any)
+
+Constructor of the class expects the following properties to be passed:
+
+- **baseApiUrl** - **Mandatory** - base API URL, example: https://app.com/api/v1 or https://app.com/api/v1/users.
+- **mode** - **Optional** - specifies what to do with page number each time `fetchList` method is used. Default value is to increase page number by one on each call.
+- **modelClass** - **Optional** - specifies an object to use for wrapping each item of received list. The class should accept raw object in its constructor to inialize its props.
+- **params** - **Optional** - is an object that will be passed to the server as URL query params.
+- **transform** - **Optional** - is a function used to transform each object of received list before applying `modelClass` if any.
+
+### clone()
+
+Used to clone the object including arrays with received data. New arrays with data reference the same objects though.
+
+### parseOrderBy(orderBy: string)
+
+Used to parse `orderBy` parameter from a string to an object. The string should have pattern like this `field1-(asc|desc)~field2-(asc|desc)`. For example, for the string `name-asc~orderDate-desc` will be converted into the object
+
+```js
+{
+  name: 'asc',
+  orderDate: 'desc'
+}
+```
+
+### resetState()
+
+Clears the class instance state.
+
+### setBaseUrl(baseApiUrl: string)
+
+Used to set new base API URL for the instance.
+
+### setModelClass(modelClass: any)
+
+Used to set new `modelClass` class. By setting new `modelClass` you reset current state so you need to refetch data.
+
+### setMode(mode: string)
+
+Sets new fetch mode. Supported modes are:
+
+- **STAY** (`API_DATALIST_FETCH_MODES.STAY`) - stay on the same page each time `fetchList` is called;
+- **FORWARD** (`API_DATALIST_FETCH_MODES.FORWARD`) - increase page number each time `fetchList` is called;
+- **BACK** (`API_DATALIST_FETCH_MODES.BAKC`) - decrease page number each time `fetchList` is called;
+
+### setParams(params: any, reset?: boolean)
+
+Sets query parameters to uses when fetching data. The `params` is an object that will be transformed into URL query string. If `reset = true` then resets object's inner state and clears all already loaded data. Example:
+
+```js
+const dataList = new ApiDataList({ ... });
+...
+const params = {
+  projectId: '123',
+  label: 'lbl'
+}
+
+dataList.setParams(params);
+
+dataList.fetchList() // https://baseurlapi/path?projectId=123&label=lbl
+```
+
+### appendParams(params: any, reset?: boolean)
+
+Append new parameters or replace existing parameters. If `reset = true` then resets object's inner state and clears all already loaded data. Example:
+
+```js
+const existingParams = dataList.getParams();
+// existingParams = {
+//   projectId: '123',
+//   label: 'lbl'
+// };
+dataList.appendParams({
+  projectId: '456',
+  status: 'open',
+});
+// dataList.getParams() = {
+//   projectId: '456',
+//   label: 'lbl',
+//   status: 'open'
+// };
+```
+
+### removeParams(keys: string[], reset?: boolean)
+
+Append new parameters or replace existing parameters. If `reset = true` then resets object's inner state and clears all already loaded data. Example:
+
+```js
+const removeParams = dataList.getParams();
+// existingParams = {
+//   projectId: '123',
+//   label: 'lbl',
+//   status: 'open'
+// };
+dataList.removeParams(['label', 'status']);
+// dataList.getParams() = {
+//   projectId: '456'
+// };
+```
+
+### resetParams(reset?: boolean)
+
+Returns existing params.
+
+### getParams()
+
+Returns existing params object.
+
+### setPageSize(pageSize: number, reset?: boolean)
+
+Sets new page size. If `reset = true` then resets object's inner state and clears all already loaded data.
+
+### setOrderBy(orderBy: any, reset?: boolean)
+
+Sets new orderBy property. The `orderBy` can be either an object or string in a specified format. Examples:
+
+```js
+dataList.setOrderBy({ name: 'asc', dateOrder: 'desc' }); // should be used on the front-end side
+dataList.setOrderBy('name-asc~dateOrder-desc'); // should be used on the back-end side to initialize ApiDataList object with orerBy property
+```
+
+If `reset = true` then resets object's inner state and clears all already loaded data.
+
+### toggleOrderBy(key: string, reset?: boolean)
+
+Toggles (asc/desc) `orderBy` property for provided field. If no field provided it toggles all fields in `orderBy`.
+If `reset = true` then resets object's inner state and clears all already loaded data.
+
+### setPage(page: number)
+
+Sets new page number. If page less than zero sets it as zero.
+
+### toNextPage()
+
+Increases page number by one.
+
+### toPrevPage()
+
+Decreases page number by one.
+
+### getPage()
+
+Returns curent page number.
+
+### canFetchMode()
+
+Returns true if the mode is `FORWARD` and it is first call or previously loaded list items length equals to `pageSize` or the mode is `BACK` and current page is greater than 1.
+
+### fetchList(path: string = '')
+
+Does call to the server API to fetch data list. The `path` is optional and if present then it is added to the `baseApiUrl` property.
+If there is no error the data list gets added to inner state `pages` object.
+The method returns `OpResult` object so user can get access to possible error details.
+
+### getTotalPages()
+
+Returns pages count requested by this moment.
+
+### getPageItems(page: number = -1)
+
+Returns items for specified page or for current page.
+
+### getItems()
+
+Returns items for all pages requested by this moment.
+
+### startLoading()
+
+Sets loading state to the inner state OpResult object. This may be used to change UI accordingly to let a user know that list is being loaded.
+
+### isLoading()
+
+Returns true if the request is still in progress.
+
+### didSucceed()
+
+Returns true if the request succeeded.
+
+### didFail()
+
+Returns true if the request failed.
+
+### getResult()
+
+Returns request result as `OpResult` object.

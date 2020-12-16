@@ -40,7 +40,8 @@ test('OpResult Class Testing', () => {
       name: {
         errors: ['Error']
       }
-    }
+    },
+    total: 1
   };
 
   const rawDataItem = {
@@ -63,6 +64,7 @@ test('OpResult Class Testing', () => {
     code: OP_RESULT_CODES.OK,
     data: [],
     errors: {},
+    total: 1
   });
 
   expect(preInitResult.toJS()).toEqual(rawResult);
@@ -73,6 +75,7 @@ test('OpResult Class Testing', () => {
     code: 0,
     data: [rawDataItem],
     errors: {},
+    total: 1
   });
 
   result.setData(rawDataArray);
@@ -81,6 +84,7 @@ test('OpResult Class Testing', () => {
     code: 0,
     data: rawDataArray,
     errors: {},
+    total: 1
   });
 
   expect(result.getDataFirst()).toEqual(rawDataArray[0]);
