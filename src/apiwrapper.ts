@@ -155,19 +155,46 @@ export class ApiWrapper {
     }
   }
 
-  async get(path: string, params?: any) {
+  /**
+   * Does GET request to baseApiUrl/path.
+   * @param {string} path path to add to baseApiUrl 
+   * @param {any?} params an object to be converted into query URL params
+   * @returns {OpResult} result of operation as an OpResult object
+   */
+  public async get(path: string, params?: any) {
     return this.doRequest({ method: 'get', path, params });
   }
 
-  async post(path: string, data?: any, params?: any) {
+  /**
+   * Does POST request to baseApiUrl/path.
+   * @param {string} path path to add to baseApiUrl 
+   * @param {any?} data an object to be sent in the body of the request
+   * @param {any?} params an object to be converted into query URL params
+   * @returns {OpResult} result of operation as an OpResult object
+   */
+  public async post(path: string, data?: any, params?: any) {
     return this.doRequest({ method: 'post', path, data, params });
   }
 
-  async put(path: string, data?: any, params?: any) {
+  /**
+   * Does PUT request to baseApiUrl/path.
+   * @param {string} path path to add to baseApiUrl 
+   * @param {any?} data an object to be sent in the body of the request
+   * @param {any?} params an object to be converted into query URL params
+   * @returns {OpResult} result of operation as an OpResult object
+   */
+  public async put(path: string, data?: any, params?: any) {
     return this.doRequest({ method: 'put', path, data, params });
   }
 
-  async delete(path: string, data?: any, params?: any) {
+  /**
+   * Does DELETE request to baseApiUrl/path.
+   * @param {string} path path to add to baseApiUrl 
+   * @param {any?} data an object to be sent in the body of the request
+   * @param {any?} params an object to be converted into query URL params
+   * @returns {OpResult} result of operation as an OpResult object
+   */
+  public async delete(path: string, data?: any, params?: any) {
     return this.doRequest({ method: 'delete', path, data, params });
   }
 }

@@ -8,6 +8,8 @@ This is a set of classes that help to organize communication between front end a
 - **ApiWrapper** - this class wraps `axios.request` method to do requests to a server and also wraps a response from server into `OpResult` class.
 - **ApiDataList** - this class used to simplify fetching paginated lists of objects from the server. It expects the server sends data as `OpResult` structure.
 
+---
+
 # OpResult
 
 This class is used to send data from server to the front-end in a unified way as well as wrap received JSON object from server in this class on the front-end side. This helps to works with data the same way as on the server as well as on the front-end.
@@ -523,6 +525,8 @@ This is static function to simplify creating of OpResult object with simple erro
 const r = OpResult.fail(OP_RESULT_CODES.NOT_FOUND, {}, 'Object not found');
 ```
 
+---
+
 # ApiWrapper
 
 The helper class wraps `axios.request` method to do a request to the server and then pass received json object into OpResult for further work. Also, the class catches all exceptions that may happen and also returns OpResult object.
@@ -557,6 +561,8 @@ This is static function used by all instances of the `ApiWrapper` and it does ac
 ### static onExceptionFn
 
 This is the function that is assigned to each `ApiWrapper` instance if no `OnException` prop passed to constructor. By default, the function just console.error information about exception.
+
+## ApiWrapper methods
 
 ### get(path: string, params: any)
 
@@ -668,6 +674,8 @@ const r = await api.delete('user/123'); // => DELETE https://my-server.com/v1/us
 // }
 ```
 
+---
+
 # ApiDataList
 
 The helper class helps to simplify fetching paginated lists of objects from the server providing the server sends data using `OpResult` structure. The class uses both `ApiWrapper` and `OpResult` in its operation. Fetched pages are cached in the memory.
@@ -678,11 +686,11 @@ The helper class helps to simplify fetching paginated lists of objects from the 
 
 Constructor of the class expects the following properties to be passed:
 
-- **baseApiUrl** - **Mandatory** - base API URL, example: https://app.com/api/v1 or https://app.com/api/v1/users.
-- **mode** - **Optional** - specifies what to do with page number each time `fetchList` method is used. Default value is to increase page number by one on each call.
-- **modelClass** - **Optional** - specifies an object to use for wrapping each item of received list. The class should accept raw object in its constructor to inialize its props.
-- **params** - **Optional** - is an object that will be passed to the server as URL query params.
-- **transform** - **Optional** - is a function used to transform each object of received list before applying `modelClass` if any.
+- **baseApiUrl** - _mandatory_ - base API URL, example: https://app.com/api/v1 or https://app.com/api/v1/users.
+- **mode** - _optional_ - specifies what to do with page number each time `fetchList` method is used. Default value is to increase page number by one on each call.
+- **modelClass** - _optional_ - specifies an object to use for wrapping each item of received list. The class should accept raw object in its constructor to inialize its props.
+- **params** - _optional_ - is an object that will be passed to the server as URL query params.
+- **transform** - _optional_ - is a function used to transform each object of received list before applying `modelClass` if any.
 
 ### clone()
 
