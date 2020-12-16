@@ -153,6 +153,12 @@ var ApiWrapper = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Does GET request to baseApiUrl/path.
+     * @param {string} path path to add to baseApiUrl
+     * @param {any?} params an object to be converted into query URL params
+     * @returns {OpResult} result of operation as an OpResult object
+     */
     ApiWrapper.prototype.get = function (path, params) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -160,6 +166,13 @@ var ApiWrapper = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Does POST request to baseApiUrl/path.
+     * @param {string} path path to add to baseApiUrl
+     * @param {any?} data an object to be sent in the body of the request
+     * @param {any?} params an object to be converted into query URL params
+     * @returns {OpResult} result of operation as an OpResult object
+     */
     ApiWrapper.prototype.post = function (path, data, params) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -167,6 +180,13 @@ var ApiWrapper = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Does PUT request to baseApiUrl/path.
+     * @param {string} path path to add to baseApiUrl
+     * @param {any?} data an object to be sent in the body of the request
+     * @param {any?} params an object to be converted into query URL params
+     * @returns {OpResult} result of operation as an OpResult object
+     */
     ApiWrapper.prototype.put = function (path, data, params) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -174,6 +194,13 @@ var ApiWrapper = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Does DELETE request to baseApiUrl/path.
+     * @param {string} path path to add to baseApiUrl
+     * @param {any?} data an object to be sent in the body of the request
+     * @param {any?} params an object to be converted into query URL params
+     * @returns {OpResult} result of operation as an OpResult object
+     */
     ApiWrapper.prototype.delete = function (path, data, params) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
