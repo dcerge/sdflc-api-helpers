@@ -499,4 +499,28 @@ export class ApiDataList {
   public getResult() {
     return this.state.result;
   }
+
+  /**
+   * Get number of rows to skip. Used for querying database.
+   */
+  public getSkip()  {
+    const { page, pageSize } = this.getParams()
+    return (page - 1) * pageSize;
+  }
+
+  /**
+   * Get number of rows to read. Used for querying database.
+   */
+  public getPageSize()  {
+    const { pageSize } = this.getParams()
+    return pageSize > 0 ? pageSize : 100;
+  }
+
+  /**
+   * Get order by object
+   */
+  public getOrderBy()  {
+    const { orderBy } = this.getParams()
+    return orderBy || {};
+  }
 };

@@ -867,3 +867,15 @@ Returns true if the request failed.
 ### getResult()
 
 Returns request result as `OpResult` object.
+
+### getSkip()
+
+Returns number of items to skip when doing query to the data source. It should used on the server side and is calculated as (page - 1) \* pageSize.
+
+### getPageSize()
+
+Returns page size used to query this amount of rows from the data source. It should be used on the server side.
+
+### getOrderBy()
+
+Returns param's `orderBy` object.

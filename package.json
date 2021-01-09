@@ -1,6 +1,6 @@
 {
   "name": "@sdflc/api-helpers",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A set of classes that help to send api calls from front end and then then back from back end.",
   "main": "build/index.js",
   "scripts": {
@@ -45,5 +45,18 @@
   },
   "dependencies": {
     "axios": "^0.21.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dcerge/sdflc-api-helpers.git"
+  },
+  "keywords": [
+    "helpers",
+    "api",
+    "sdflc"
+  ],
+  "bugs": {
+    "url": "https://github.com/dcerge/sdflc-api-helpers/issues"
+  },
+  "homepage": "https://github.com/dcerge/sdflc-api-helpers#readme"
 }

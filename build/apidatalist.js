@@ -448,6 +448,27 @@ var ApiDataList = /** @class */ (function () {
         return this.state.result;
     };
     /**
+     * Get number of rows to skip. Used for querying database.
+     */
+    ApiDataList.prototype.getSkip = function () {
+        var _a = this.getParams(), page = _a.page, pageSize = _a.pageSize;
+        return (page - 1) * pageSize;
+    };
+    /**
+     * Get number of rows to read. Used for querying database.
+     */
+    ApiDataList.prototype.getPageSize = function () {
+        var pageSize = this.getParams().pageSize;
+        return pageSize > 0 ? pageSize : 100;
+    };
+    /**
+     * Get order by object
+     */
+    ApiDataList.prototype.getOrderBy = function () {
+        var orderBy = this.getParams().orderBy;
+        return orderBy || {};
+    };
+    /**
      * Defaults used when an object of the class gets initialized
      */
     ApiDataList.defaults = {
