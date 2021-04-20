@@ -30,16 +30,20 @@ const createData = (props: any) => {
   return modelClass ? arrData.map((dataItem: any) => new modelClass(dataItem)) : arrData;
 };
 
+interface OpResultErrorItem {
+  name: string;
+  errors: string[];
+}
+
 export class OpResult {
   code: number = OP_RESULT_CODES.OK;
   data: any = null;
-  total: number = 1;
-  errors: any = null;
+  total = 0;
+  errors: OpResultErrorItem[] = [];
 
-  private opt?: any  = {};
+  private opt?: any = {};
 
   constructor(props?: any, opt?: any) {
-
     if (!props) {
       props = {};
     }
@@ -48,7 +52,7 @@ export class OpResult {
       opt = {
         modelClass: null,
         transform: null,
-        doFlatted: true
+        doFlatted: true,
       };
     }
 
@@ -56,7 +60,7 @@ export class OpResult {
 
     this.code = code || OP_RESULT_CODES.OK;
     this.data = createData({ data, ...opt });
-    this.errors = errors || {};
+    this.errors = errors || [];
     this.opt = opt;
   }
 
@@ -74,13 +78,14 @@ export class OpResult {
     return this;
   }
 
-  getDataFirst(defaultValue: any) {
+  getDataFirst(defaultValue?: any) {
     const data = this.data && this.data[0];
+
     if (!data) {
       return defaultValue === undefined ? data : defaultValue;
-    } else {
-      return data;
     }
+
+    return data;
   }
 
   getData() {
@@ -107,16 +112,18 @@ export class OpResult {
 
   addError(field: string, errorMessage: string, code?: number) {
     const key = field || '';
+    let err = this.errors.find((item) => item.name === key);
 
-    if (this.errors[key] === undefined) {
-      this.errors = {
-        [key]: {
-          errors: []
-        }
+    if (!err) {
+      err = {
+        name: field,
+        errors: [errorMessage],
       };
-    }
 
-    this.errors[key].errors.push(errorMessage);
+      this.errors.push(err);
+    } else {
+      err.errors.push(errorMessage);
+    }
 
     if (code != undefined && !isNaN(code)) {
       this.code = code;
@@ -126,7 +133,7 @@ export class OpResult {
   }
 
   clearErrors() {
-    this.errors = {};
+    this.errors = [];
 
     return this;
   }
@@ -134,7 +141,7 @@ export class OpResult {
   applyModelClass(modelClass: any) {
     this.opt = {
       ...this.opt,
-      modelClass
+      modelClass,
     };
 
     const { data, opt } = this;
@@ -153,7 +160,7 @@ export class OpResult {
   }
 
   hasErrors() {
-    return this.getErrorFields().length > 0;
+    return Array.isArray(this.errors) ? this.errors.length > 0 : 0;
   }
 
   didSucceedAndHasData() {
@@ -199,25 +206,29 @@ export class OpResult {
     return new OpResult({ code: this.code, data: this.data, errors: this.errors }, { ...this.opt });
   }
 
+  getFieldErrors(field: string) {
+    const errors = (this.errors || []).find((item: any) => item.name === field);
+    return errors && Array.isArray(errors.errors) ? errors.errors : [];
+  }
+
   getErrorSummary(field?: string) {
-    const errors = (this.errors && this.errors[field || '']) || {};
-    const strs = errors instanceof Array ? errors : errors.errors || [];
+    const strs = this.getFieldErrors(field || '');
+
     return strs.reduce((r: string, c: string) => {
       return (r = `${r} ${c}`.trim());
     }, '');
   }
 
   getErrorFields() {
-    return Object.keys(this.errors);
+    return this.errors.reduce((acc: string[], item: any) => {
+      acc.push(item.name);
+      return acc;
+    }, []);
   }
 
-  getFieldErrors(fieldName: string) {
-    return (this.errors[fieldName] || {}).errors || [];
-  }
-
-  getDataFieldValue(fieldName: string, defaultValue: string = '') {
+  getDataFieldValue(field: string, defaultValue = '') {
     const data = (this.data instanceof Array ? this.data[0] : this.data) || {};
-    return typeof data[fieldName] === 'function' ? data[fieldName](data) : data[fieldName] || defaultValue;
+    return typeof data[field] === 'function' ? data[field](data) : data[field] || defaultValue;
   }
 
   toJS() {
@@ -225,7 +236,7 @@ export class OpResult {
       code: this.code,
       data: this.data,
       total: this.total,
-      errors: this.errors,      
+      errors: this.errors,
     };
   }
 
@@ -248,34 +259,39 @@ export class OpResult {
   static ok(data?: any, opt?: any) {
     return new OpResult({
       code: OP_RESULT_CODES.OK,
-      data: createData({ data, ...opt })
+      data: createData({ data, ...opt }),
     });
   }
 
-  static fail(code: number, data?: any, message?: string, opt?: any) {
-    let errors = {};
+  static fail(code: number, data?: any, message?: any, opt?: any) {
+    let errors = [];
 
     if (typeof message === 'object') {
       errors = Object.keys(message).reduce((acc: any, key: string) => {
-        acc[key] = {
-          errors: [message[key]],
-        };
+        acc.push({
+          name: key,
+          errors: message[key] ? [message[key]] : [],
+        });
 
         return acc;
-      }, {});
+      }, []);
     } else {
-      errors = {
-        '': {
-          errors: [message || ''],
+      errors = [
+        {
+          name: '',
+          errors: message ? [message] : [],
         },
-      };
+      ];
     }
 
-    return new OpResult({
-      code,
-      errors,
-      data
-    }, opt);
+    return new OpResult(
+      {
+        code,
+        errors,
+        data,
+      },
+      opt,
+    );
   }
 
   static fromException(exception: any) {

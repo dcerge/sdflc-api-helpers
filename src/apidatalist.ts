@@ -5,7 +5,7 @@ import { ApiWrapper } from './apiwrapper';
 export const API_DATALIST_FETCH_MODES = {
   STAY: 'STAY',
   FORWARD: 'FORWARD',
-  BACK: 'BACK'
+  BACK: 'BACK',
 };
 
 export class ApiDataList {
@@ -22,7 +22,7 @@ export class ApiDataList {
   static defaults = {
     mode: API_DATALIST_FETCH_MODES.FORWARD,
     modelClass: null,
-    page: 1, 
+    page: 1,
     pageSize: process.env.DATALIST_DEFAULT_PAGESIZE || 50,
     orderBy: {},
     params: {},
@@ -58,14 +58,14 @@ export class ApiDataList {
       ...(params || ApiDataList.defaults.params),
       page: +(params || {}).page || ApiDataList.defaults.page,
       pageSize: +(params || {}).pageSize || ApiDataList.defaults.pageSize,
-      orderBy: this.processOrderBy((params || {}).orderBy)
+      orderBy: this.processOrderBy((params || {}).orderBy),
     };
 
     this.setState(props.state);
   }
 
   /**
-   * Create clone of the object. Note this is shallow cloning and all the pages data will not be cloned 
+   * Create clone of the object. Note this is shallow cloning and all the pages data will not be cloned
    * but rather be wrapped in a new object. This helps to work with redux.
    */
   public clone() {
@@ -84,11 +84,11 @@ export class ApiDataList {
 
     this.state = {
       currentPage: state.currentPage || ApiDataList.defaultState.currentPage,
-      pages: state.pages || { ... ApiDataList.defaultState.pages },
+      pages: state.pages || { ...ApiDataList.defaultState.pages },
       result: new OpResult(null, { modelClass: this.modelClass }),
       loadedCnt: state.loadedCnt || ApiDataList.defaultState.loadedCnt,
       totalCnt: state.loadedCnt || ApiDataList.defaultState.totalCnt,
-      allRead: false
+      allRead: false,
     };
 
     return this;
@@ -100,7 +100,7 @@ export class ApiDataList {
   private stringifyOrderBy() {
     const arr: string[] = [];
 
-    Object.keys(this.params.orderBy).forEach(key => {
+    Object.keys(this.params.orderBy).forEach((key) => {
       arr.push(`${key}-${this.params.orderBy[key]}`);
     });
 
@@ -117,7 +117,7 @@ export class ApiDataList {
 
     const tmp: any = {};
 
-    orderBy.split('~').forEach(token => {
+    orderBy.split('~').forEach((token) => {
       const [key, tmpOrder] = token.split('-');
       const orderIdx = ApiDataList.defaults.allowedOrderDirections.indexOf((tmpOrder || '').toLowerCase());
       const order = ApiDataList.defaults.allowedOrderDirections[orderIdx !== -1 ? orderIdx : 0];
@@ -157,7 +157,7 @@ export class ApiDataList {
   /**
    * Sets modelClass which is used as received list items initialized.
    * It may be needed to conver anonymous objects to required class.
-   * @param modelClass 
+   * @param modelClass
    */
   public setModelClass(modelClass: any) {
     this.modelClass = modelClass;
@@ -179,7 +179,7 @@ export class ApiDataList {
   }
 
   /**
-   * Sets parameters to send to the server. Parameters is what added after '?' in URL. 
+   * Sets parameters to send to the server. Parameters is what added after '?' in URL.
    * @param params to be send to the server along with API call.
    * @param {boolean} reset if specified and true then resets inner state
    */
@@ -195,9 +195,16 @@ export class ApiDataList {
    * @param {boolean} reset if specified and true then resets inner state
    */
   public appendParams(params: any, reset?: boolean) {
+    const newParams = {
+      ...params,
+      page: +(params || {}).page || this.params.page || ApiDataList.defaults.page,
+      pageSize: +(params || {}).pageSize || this.params.pageSize || ApiDataList.defaults.pageSize,
+      orderBy: this.processOrderBy((params || this.params).orderBy),
+    };
+
     this.params = {
       ...this.params,
-      ...params
+      ...newParams,
     };
 
     return reset === true ? this.resetState() : this;
@@ -209,7 +216,7 @@ export class ApiDataList {
    * @param {boolean} reset if specified and true then resets inner state
    */
   public removeParams(keys: string[], reset?: boolean) {
-    const newParams = Object.keys(this.params|| {})
+    const newParams = Object.keys(this.params || {})
       .filter((key: string) => keys.indexOf(key) === -1)
       .reduce((obj: any, key: string) => {
         obj[key] = this.params[key];
@@ -218,7 +225,7 @@ export class ApiDataList {
       }, {});
 
     this.params = {
-      ...newParams
+      ...newParams,
     };
 
     return reset === true ? this.resetState() : this;
@@ -248,7 +255,7 @@ export class ApiDataList {
    */
   public setPageSize(pageSize: number, reset?: boolean) {
     this.params.pageSize = pageSize;
-    
+
     return reset === true ? this.resetState() : this;
   }
 
@@ -268,16 +275,16 @@ export class ApiDataList {
       return orderBy;
     } else {
       // orderBy is neither string or object so use class defaults
-      return ApiDataList.defaults.orderBy
+      return ApiDataList.defaults.orderBy;
     }
   }
 
   /**
    * Sets new orderBy property.
-   * @param {object|string} orderBy object or string to be set to orderBy property.
+   * @param {any|string} orderBy object or string to be set to orderBy property.
    * @param {boolean} reset if specified and true then resets inner state
    */
-  public setOrderBy(orderBy: object|string, reset?: boolean) {
+  public setOrderBy(orderBy: any | string, reset?: boolean) {
     this.params.orderBy = this.processOrderBy(orderBy);
 
     return reset === true ? this.resetState() : this;
@@ -293,12 +300,12 @@ export class ApiDataList {
     const { orderBy } = this.params;
 
     if (!key) {
-      Object.keys(orderBy).forEach(item => this.toggleOrderBy(item, false));
+      Object.keys(orderBy).forEach((item) => this.toggleOrderBy(item, false));
 
       return reset === true ? this.resetState() : this;
     }
 
-    let order = orderBy[key];
+    const order = orderBy[key];
 
     if (order === 'asc') {
       newOrder = 'desc';
@@ -349,7 +356,7 @@ export class ApiDataList {
    * Returns curent page number.
    */
   public getPage() {
-    return  this.state.currentPage;
+    return this.state.currentPage;
   }
 
   /**
@@ -359,8 +366,10 @@ export class ApiDataList {
    * - mode is backward and page number is more than one.
    */
   public canFetchMode() {
-    return (this.mode === API_DATALIST_FETCH_MODES.FORWARD && !this.state.allRead) 
-      || (this.mode === API_DATALIST_FETCH_MODES.BACK && this.state.currentPage > 1);
+    return (
+      (this.mode === API_DATALIST_FETCH_MODES.FORWARD && !this.state.allRead) ||
+      (this.mode === API_DATALIST_FETCH_MODES.BACK && this.state.currentPage > 1)
+    );
   }
 
   /**
@@ -369,7 +378,7 @@ export class ApiDataList {
    * @param path relative path added to API URL.
    * @returns OpResult result of fetch list operation.
    */
-  public async fetchList(path: string = '') {
+  public async fetchList(path = '') {
     let page = this.state.currentPage;
 
     switch (this.mode) {
@@ -423,7 +432,7 @@ export class ApiDataList {
 
     this.state.loadedCnt = newItems.length;
     this.state.totalCnt += this.state.loadedCnt;
-    this.state.allRead = this.state.loadedCnt < this.params.pageSize; 
+    this.state.allRead = this.state.loadedCnt < this.params.pageSize;
 
     if (this.state.loadedCnt > 0) {
       this.state.pages[this.state.currentPage] = newItems;
@@ -439,9 +448,9 @@ export class ApiDataList {
 
   /**
    * Returns items for specified page or for current page.
-   * @param page 
+   * @param page
    */
-  public getPageItems(page: number = -1) {
+  public getPageItems(page = -1) {
     const items = this.state.pages[page];
     return Array.isArray(items) ? items : [];
   }
@@ -503,24 +512,31 @@ export class ApiDataList {
   /**
    * Get number of rows to skip. Used for querying database.
    */
-  public getSkip()  {
-    const { page, pageSize } = this.getParams()
+  public getSkip() {
+    const { page, pageSize } = this.getParams();
     return (page - 1) * pageSize;
   }
 
   /**
    * Get number of rows to read. Used for querying database.
    */
-  public getPageSize()  {
-    const { pageSize } = this.getParams()
+  public getPageSize() {
+    const { pageSize } = this.getParams();
     return pageSize > 0 ? pageSize : 100;
   }
 
   /**
    * Get order by object
    */
-  public getOrderBy()  {
-    const { orderBy } = this.getParams()
+  public getOrderBy() {
+    const { orderBy } = this.getParams();
     return orderBy || {};
   }
-};
+
+  public listOrderBy(mapper: any) {
+    const { orderBy } = this.getParams();
+    return Object.entries(orderBy)
+      .map(([key, val]) => (mapper[key] ? { field: mapper[key], order: val } : null))
+      .filter((item) => item);
+  }
+}

@@ -19,7 +19,7 @@ The object structure basically looks like this:
 {
   code: 0,   // Result code. Zero is OK, negative value is an error
   data: [],  // Data from server are always wrapped by an array. Event for one items that server sends it gets wrapped into an array
-  errors: {} // An object with errors if any. See description below
+  errors: [] // An array with errors if any. See description below
 }
 ```
 
@@ -34,7 +34,7 @@ Here is an example of the object with some data:
       email: 'jsmith@email.com'
     }
   ],
-  errors: {}
+  errors: []
 }
 ```
 
@@ -44,13 +44,14 @@ Here is an example of the object error after trying to save data:
 {
   code: 0,
   data: [],
-  errors: {
-    '': {
+  errors: [
+    {
+      name: '',
       errors: [
         'Failed to save user information due to lack of access rights.'
       ]
     }
-  }
+  ]
 }
 ```
 
@@ -65,13 +66,14 @@ or
       email: 'jsmith-email.com'
     }
   ],
-  errors: {
-    'email': {
+  errors: [
+    {
+      name: 'email',
       errors: [
         'Email field should should be a valid email address'
       ]
     }
-  }
+  ]
 }
 ```
 
@@ -121,29 +123,24 @@ It is important to keep in mind that data is alwat an array. If there is no data
 
 ### errors
 
-The `errors` property is an object that contains information about errors occured during executing an operation. The structure of the `errors` object has the following structure:
+The `errors` property is an array that contains information about errors occured during executing an operation. The structure of the `errors` object has the following structure:
 
 ```js
-{
-  '': {
-    errors: ['Summary error description']
+[
+  {
+    name: '',
+    errors: ['Summary error description'],
   },
-  fieldName: {
-    errors: [
-      'fieldName error description',
-      'You can add several errors for the fieldName'
-    ]
+  {
+    name: fieldName,
+    errors: ['fieldName error description', 'You can add several errors for the fieldName'],
   },
-  otherName: {
-    errors: [
-      'otherName error description',
-      'You can add several errors for the otherName'
-    ]
-  }
-}
+  {
+    name: otherName,
+    errors: ['otherName error description', 'You can add several errors for the otherName'],
+  },
+];
 ```
-
-As you can see each object key is either a fieldName or ''. This way you can automate displaying errors for each wrong field of your form.
 
 ## OpResults methods
 
@@ -155,7 +152,7 @@ Contructor accepts props that are expected to look like:
 {
   code: 0,
   data: [],
-  errors: {}
+  errors: []
 }
 ```
 
@@ -353,11 +350,11 @@ const getRq = async (userData) => {
 };
 ```
 
-### isSucceeded()
+### didSucceed()
 
 Returns true if the `code` isequal to OP_RESULT_CODES.OK.
 
-### isFailed()
+### didFail()
 
 Returns true if the `code` is not equal to OP_RESULT_CODES.OK.
 
@@ -376,7 +373,11 @@ r.setData([null, { name: 'John' }]);
 r.hasData(); // => true as data = [null, { name: 'John' }]
 ```
 
-### isSucceededAndHasData()
+### hasErrors()
+
+Returns true if there are elements in the OpResult.errors array
+
+### didSucceedAndHasData()
 
 Returns true if the `code` is equal to OP_RESULT_CODES.OK and `hasData() === true`.
 
@@ -448,7 +449,7 @@ r.addError('email', 'Invalid email address.', OP_RESULT_CODE.VALIDATION_FAILED);
 r.getErrorFields(); // => ['name', 'email']
 ```
 
-### getFieldErrors(fieldName: string)
+### getFieldErrors(field: string)
 
 Returns array with all errors for the specified field:
 

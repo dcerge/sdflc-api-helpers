@@ -186,7 +186,8 @@ var ApiDataList = /** @class */ (function () {
      * @param {boolean} reset if specified and true then resets inner state
      */
     ApiDataList.prototype.appendParams = function (params, reset) {
-        this.params = __assign(__assign({}, this.params), params);
+        var newParams = __assign(__assign({}, params), { page: +(params || {}).page || this.params.page || ApiDataList.defaults.page, pageSize: +(params || {}).pageSize || this.params.pageSize || ApiDataList.defaults.pageSize, orderBy: this.processOrderBy((params || this.params).orderBy) });
+        this.params = __assign(__assign({}, this.params), newParams);
         return reset === true ? this.resetState() : this;
     };
     /**
@@ -467,6 +468,13 @@ var ApiDataList = /** @class */ (function () {
     ApiDataList.prototype.getOrderBy = function () {
         var orderBy = this.getParams().orderBy;
         return orderBy || {};
+    };
+    ApiDataList.prototype.listOrderBy = function (mapper) {
+        var orderBy = this.getParams().orderBy;
+        return Object.entries(orderBy).map(function (_a) {
+            var key = _a[0], val = _a[1];
+            return mapper[key] ? { field: mapper[key], order: val } : null;
+        }).filter(function (item) { return item; });
     };
     /**
      * Defaults used when an object of the class gets initialized
