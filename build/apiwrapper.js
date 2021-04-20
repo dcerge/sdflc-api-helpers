@@ -135,7 +135,6 @@ var ApiWrapper = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        response = void 0;
                         return [4 /*yield*/, ApiWrapper.fetcnFn(__assign({ method: method,
                                 url: url,
                                 data: data,
@@ -216,7 +215,6 @@ var ApiWrapper = /** @class */ (function () {
      */
     ApiWrapper.fetchFnOpts = {
         withCredentials: true,
-        // should be made using credentials
         timeout: 0,
     };
     /**
@@ -249,7 +247,7 @@ var ApiWrapper = /** @class */ (function () {
         validationFailed: 'Some of required fields missed.',
         notFound: 'API entry point was not found. Please contact support.',
         serverError: 'The server responded with an error',
-        exception: 'An exception has occured when making a request: '
+        exception: 'An exception has occured when making a request: ',
     };
     return ApiWrapper;
 }());

@@ -40,8 +40,8 @@ var OpResult = /** @class */ (function () {
     function OpResult(props, opt) {
         this.code = opresult_codes_1.OP_RESULT_CODES.OK;
         this.data = null;
-        this.total = 1;
-        this.errors = null;
+        this.total = 0;
+        this.errors = [];
         this.opt = {};
         if (!props) {
             props = {};
@@ -50,13 +50,13 @@ var OpResult = /** @class */ (function () {
             opt = {
                 modelClass: null,
                 transform: null,
-                doFlatted: true
+                doFlatted: true,
             };
         }
         var code = props.code, data = props.data, errors = props.errors;
         this.code = code || opresult_codes_1.OP_RESULT_CODES.OK;
         this.data = createData(__assign({ data: data }, opt));
-        this.errors = errors || {};
+        this.errors = errors || [];
         this.opt = opt;
     }
     /**
@@ -77,9 +77,7 @@ var OpResult = /** @class */ (function () {
         if (!data) {
             return defaultValue === undefined ? data : defaultValue;
         }
-        else {
-            return data;
-        }
+        return data;
     };
     OpResult.prototype.getData = function () {
         return this.data;
@@ -99,23 +97,25 @@ var OpResult = /** @class */ (function () {
         return this.total;
     };
     OpResult.prototype.addError = function (field, errorMessage, code) {
-        var _a;
         var key = field || '';
-        if (this.errors[key] === undefined) {
-            this.errors = (_a = {},
-                _a[key] = {
-                    errors: []
-                },
-                _a);
+        var err = this.errors.find(function (item) { return item.name === key; });
+        if (!err) {
+            err = {
+                name: field,
+                errors: [errorMessage],
+            };
+            this.errors.push(err);
         }
-        this.errors[key].errors.push(errorMessage);
+        else {
+            err.errors.push(errorMessage);
+        }
         if (code != undefined && !isNaN(code)) {
             this.code = code;
         }
         return this;
     };
     OpResult.prototype.clearErrors = function () {
-        this.errors = {};
+        this.errors = [];
         return this;
     };
     OpResult.prototype.applyModelClass = function (modelClass) {
@@ -131,7 +131,7 @@ var OpResult = /** @class */ (function () {
         return (this.data || []).length > 0 && this.data[0] != null && this.data[0] != undefined;
     };
     OpResult.prototype.hasErrors = function () {
-        return this.getErrorFields().length > 0;
+        return Array.isArray(this.errors) ? this.errors.length > 0 : 0;
     };
     OpResult.prototype.didSucceedAndHasData = function () {
         return this.code >= opresult_codes_1.OP_RESULT_CODES.OK && this.hasData();
@@ -166,23 +166,26 @@ var OpResult = /** @class */ (function () {
     OpResult.prototype.clone = function () {
         return new OpResult({ code: this.code, data: this.data, errors: this.errors }, __assign({}, this.opt));
     };
+    OpResult.prototype.getFieldErrors = function (field) {
+        var errors = (this.errors || []).find(function (item) { return item.name === field; });
+        return errors && Array.isArray(errors.errors) ? errors.errors : [];
+    };
     OpResult.prototype.getErrorSummary = function (field) {
-        var errors = (this.errors && this.errors[field || '']) || {};
-        var strs = errors instanceof Array ? errors : errors.errors || [];
+        var strs = this.getFieldErrors(field || '');
         return strs.reduce(function (r, c) {
             return (r = (r + " " + c).trim());
         }, '');
     };
     OpResult.prototype.getErrorFields = function () {
-        return Object.keys(this.errors);
+        return this.errors.reduce(function (acc, item) {
+            acc.push(item.name);
+            return acc;
+        }, []);
     };
-    OpResult.prototype.getFieldErrors = function (fieldName) {
-        return (this.errors[fieldName] || {}).errors || [];
-    };
-    OpResult.prototype.getDataFieldValue = function (fieldName, defaultValue) {
+    OpResult.prototype.getDataFieldValue = function (field, defaultValue) {
         if (defaultValue === void 0) { defaultValue = ''; }
         var data = (this.data instanceof Array ? this.data[0] : this.data) || {};
-        return typeof data[fieldName] === 'function' ? data[fieldName](data) : data[fieldName] || defaultValue;
+        return typeof data[field] === 'function' ? data[field](data) : data[field] || defaultValue;
     };
     OpResult.prototype.toJS = function () {
         return {
@@ -207,30 +210,32 @@ var OpResult = /** @class */ (function () {
     OpResult.ok = function (data, opt) {
         return new OpResult({
             code: opresult_codes_1.OP_RESULT_CODES.OK,
-            data: createData(__assign({ data: data }, opt))
+            data: createData(__assign({ data: data }, opt)),
         });
     };
     OpResult.fail = function (code, data, message, opt) {
-        var errors = {};
+        var errors = [];
         if (typeof message === 'object') {
             errors = Object.keys(message).reduce(function (acc, key) {
-                acc[key] = {
-                    errors: [message[key]],
-                };
+                acc.push({
+                    name: key,
+                    errors: message[key] ? [message[key]] : [],
+                });
                 return acc;
-            }, {});
+            }, []);
         }
         else {
-            errors = {
-                '': {
-                    errors: [message || ''],
+            errors = [
+                {
+                    name: '',
+                    errors: message ? [message] : [],
                 },
-            };
+            ];
         }
         return new OpResult({
             code: code,
             errors: errors,
-            data: data
+            data: data,
         }, opt);
     };
     OpResult.fromException = function (exception) {

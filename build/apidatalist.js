@@ -54,7 +54,7 @@ var apiwrapper_1 = require("./apiwrapper");
 exports.API_DATALIST_FETCH_MODES = {
     STAY: 'STAY',
     FORWARD: 'FORWARD',
-    BACK: 'BACK'
+    BACK: 'BACK',
 };
 var ApiDataList = /** @class */ (function () {
     function ApiDataList(props) {
@@ -95,7 +95,7 @@ var ApiDataList = /** @class */ (function () {
             result: new opresult_1.OpResult(null, { modelClass: this.modelClass }),
             loadedCnt: state.loadedCnt || ApiDataList.defaultState.loadedCnt,
             totalCnt: state.loadedCnt || ApiDataList.defaultState.totalCnt,
-            allRead: false
+            allRead: false,
         };
         return this;
     };
@@ -252,7 +252,7 @@ var ApiDataList = /** @class */ (function () {
     };
     /**
      * Sets new orderBy property.
-     * @param {object|string} orderBy object or string to be set to orderBy property.
+     * @param {any|string} orderBy object or string to be set to orderBy property.
      * @param {boolean} reset if specified and true then resets inner state
      */
     ApiDataList.prototype.setOrderBy = function (orderBy, reset) {
@@ -322,8 +322,8 @@ var ApiDataList = /** @class */ (function () {
      * - mode is backward and page number is more than one.
      */
     ApiDataList.prototype.canFetchMode = function () {
-        return (this.mode === exports.API_DATALIST_FETCH_MODES.FORWARD && !this.state.allRead)
-            || (this.mode === exports.API_DATALIST_FETCH_MODES.BACK && this.state.currentPage > 1);
+        return ((this.mode === exports.API_DATALIST_FETCH_MODES.FORWARD && !this.state.allRead) ||
+            (this.mode === exports.API_DATALIST_FETCH_MODES.BACK && this.state.currentPage > 1));
     };
     /**
      * Make API call to fetch list from the server. Before making actual call it changes page number accordingly.
@@ -471,10 +471,12 @@ var ApiDataList = /** @class */ (function () {
     };
     ApiDataList.prototype.listOrderBy = function (mapper) {
         var orderBy = this.getParams().orderBy;
-        return Object.entries(orderBy).map(function (_a) {
+        return Object.entries(orderBy)
+            .map(function (_a) {
             var key = _a[0], val = _a[1];
-            return mapper[key] ? { field: mapper[key], order: val } : null;
-        }).filter(function (item) { return item; });
+            return (mapper[key] ? { field: mapper[key], order: val } : null);
+        })
+            .filter(function (item) { return item; });
     };
     /**
      * Defaults used when an object of the class gets initialized
@@ -502,4 +504,3 @@ var ApiDataList = /** @class */ (function () {
     return ApiDataList;
 }());
 exports.ApiDataList = ApiDataList;
-;
