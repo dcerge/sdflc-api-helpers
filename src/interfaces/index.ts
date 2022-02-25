@@ -1,0 +1,1 @@
+export { QueryGraphQLArgs } from './QueryGraphQLArgs';

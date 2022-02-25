@@ -880,3 +880,64 @@ Returns page size used to query this amount of rows from the data source. It sho
 ### getOrderBy()
 
 Returns param's `orderBy` object.
+
+# GraphQL Helpers
+
+## queryGraphQL(args: QueryGraphQLArgs): OpResult
+
+The `QueryGraphQLArgs` has the following paramters:
+
+- url - string - URL of the GraphQL server
+- queryName: string - name of query in the query string, used to extract result from response
+- query: string - query string to be sent
+- variables?: any - an object representing variables to send along with the query
+- headers?: any - an object with HTTP headers, for example authorization header
+
+Example of usage:
+
+```
+const result = await queryGraphQL({
+  url: 'http://localhost:4000,
+  query: `
+    query SignIn($params: SignInInput) {
+      signIn(params: $params) {
+        code
+        errors {
+          name
+          errors
+          warnings
+        }
+        data {
+          id
+          username
+          email
+          firstName
+          middleName
+          lastName
+        }
+      }
+    }
+  `,
+  variables: {
+    username: 'testuser',
+    password: 'somepassword',
+  },
+  headers: {
+    'x-api-key': 'some-api-key'
+  }
+});
+
+// result.data =>
+// {
+//   code: 0,
+//   errors: [],
+//   data: {
+//     id: 1,
+//     username: 'testuser',
+//     email: 'some@gmail.com',
+//     firstName: 'Test',
+//     middleName: '',
+//     lastName: 'User',
+//   }
+// }
+```
