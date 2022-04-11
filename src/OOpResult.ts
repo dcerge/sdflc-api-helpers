@@ -1,4 +1,5 @@
-import { OP_RESULT_CODES, OP_RESULT_CODE_TO_HTTP_CODE } from './opresult-codes';
+import { OP_RESULT_CODES, OP_RESULT_CODE_TO_HTTP_CODE } from './opResultCodes';
+import { OpResultErrorItem } from './interfaces';
 
 const createData = (props: any) => {
   const { data, modelClass, transform, flatten } = props;
@@ -29,11 +30,6 @@ const createData = (props: any) => {
 
   return modelClass ? arrData.map((dataItem: any) => new modelClass(dataItem)) : arrData;
 };
-
-interface OpResultErrorItem {
-  name: string;
-  errors: string[];
-}
 
 export class OpResult {
   code: number = OP_RESULT_CODES.OK;

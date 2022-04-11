@@ -1,4 +1,4 @@
-import { HTTP_STATUSES } from './http-codes';
+import { HTTP_STATUSES } from './httpStatuses';
 
 export const OP_RESULT_CODES = {
   DELETING: 10003,

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-import { OP_RESULT_CODES } from './opresult-codes';
-import { HTTP_STATUSES } from './http-codes';
-import { OpResult } from './opresult';
+import { OP_RESULT_CODES } from './opResultCodes';
+import { HTTP_STATUSES } from './httpStatuses';
+import { OpResult } from './OOpResult';
 
 export class ApiWrapper {
   static defaultBaseApiUrl = '';
@@ -147,9 +147,9 @@ export class ApiWrapper {
       const result = new OpResult(response.data, this.resultOptions);
 
       return this.postResult(response, result);
-    } catch (exception) {
+    } catch (exception: any) {
       this.onException({ method, url, params, data, exception });
-      return this.postResult(null, new OpResult((exception || {}).data));
+      return this.postResult(null, new OpResult(exception.data ? exception.data : {}));
     }
   }
 

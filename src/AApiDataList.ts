@@ -1,6 +1,6 @@
-import { OP_RESULT_CODES } from './opresult-codes';
-import { OpResult } from './opresult';
-import { ApiWrapper } from './apiwrapper';
+import { OP_RESULT_CODES } from './opResultCodes';
+import { OpResult } from './OOpResult';
+import { ApiWrapper } from './AApiWrapper';
 
 export const API_DATALIST_FETCH_MODES = {
   STAY: 'STAY',
