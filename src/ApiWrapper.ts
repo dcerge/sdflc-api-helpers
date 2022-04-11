@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { OP_RESULT_CODES } from './opResultCodes';
 import { HTTP_STATUSES } from './httpStatuses';
-import { OpResult } from './OOpResult';
+import { OpResult } from './OpResult';
 
 export class ApiWrapper {
   static defaultBaseApiUrl = '';

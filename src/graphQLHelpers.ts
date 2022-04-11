@@ -1,5 +1,5 @@
-import { OP_RESULT_CODES } from './opresult-codes';
-import { OpResult } from './opresult';
+import { OP_RESULT_CODES } from './opResultCodes';
+import { OpResult } from './OpResult';
 import axios from 'axios';
 
 import { QueryGraphQLArgs } from './interfaces/QueryGraphQLArgs';
