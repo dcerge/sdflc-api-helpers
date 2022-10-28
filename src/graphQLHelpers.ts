@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { OP_RESULT_CODES } from './opResultCodes';
 import { OpResult } from './OpResult';
-import axios from 'axios';
 
 import { QueryGraphQLArgs } from './interfaces/QueryGraphQLArgs';
 
@@ -37,7 +37,7 @@ const queryGraphQL = async (args: QueryGraphQLArgs) => {
     return new OpResult(response.data.data[queryName]);
   } catch (ex: any) {
     if (ex.response?.status === 400) {
-      return OpResult.fail(OP_RESULT_CODES.EXCEPTION, ex.response.data, ex.message);
+      return OpResult.fail(OP_RESULT_CODES.VALIDATION_FAILED, ex.response.data, ex.message);
     } else {
       return OpResult.fail(OP_RESULT_CODES.EXCEPTION, ex, ex.message);
     }
