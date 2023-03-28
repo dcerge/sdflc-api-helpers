@@ -106,17 +106,19 @@ export class OpResult {
     return this.total;
   }
 
-  addError(field: string, errorMessage: string, code?: number) {
+  addError(field: string, errorMessage: string | string[], code?: number) {
     const key = field || '';
     let err = this.errors.find((item) => item.name === key);
 
     if (!err) {
       err = {
         name: field,
-        errors: [errorMessage],
+        errors: Array.isArray(errorMessage) ? errorMessage : [errorMessage],
       };
 
       this.errors.push(err);
+    } else if (Array.isArray(errorMessage)) {
+      err.errors.push(...errorMessage);
     } else {
       err.errors.push(errorMessage);
     }
