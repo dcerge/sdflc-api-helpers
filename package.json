@@ -1,6 +1,6 @@
 {
   "name": "@sdflc/api-helpers",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "type": "module",
   "description": "A set of classes that help to send api calls from front end and then then back from back end.",
   "main": "build/index.js",
