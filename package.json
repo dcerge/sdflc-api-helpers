@@ -1,16 +1,23 @@
 {
   "name": "@sdflc/api-helpers",
   "version": "1.1.12",
-  "type": "module",
   "description": "A set of classes that help to send api calls from front end and then then back from back end.",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "type": "commonjs",
+  "exports": {
+    ".": {
+      "import": "./build/esm/index.js",
+      "require": "./build/index.js"
+    }
+  },
+  "main": "./build/index.js",
+  "module": "./build/esm/index.js",
+  "types": "./build/index.d.ts",
   "files": [
     "build/**/*"
   ],
   "scripts": {
-    "build": "rimraf ./build && tsc",
-    "lint": "eslint .",
+    "build": "rimraf ./build && tsc && tsc -p tsconfig.esm.json",
+    "lint": "ESLINT_USE_FLAT_CONFIG=true eslint .",
     "test": "jest --config jest.config.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build",
