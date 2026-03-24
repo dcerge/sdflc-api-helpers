@@ -2,6 +2,7 @@ export interface QueryGraphQLArgs {
   url: string;
   queryName: string;
   query: string;
-  variables?: any;
-  headers?: any;
+  variables?: Record<string, unknown>;
+  headers?: Record<string, string>;
+  timeoutMs?: number;
 }

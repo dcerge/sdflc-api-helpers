@@ -1,2 +1,2 @@
-export { QueryGraphQLArgs } from './QueryGraphQLArgs';
-export { OpResultErrorItem } from './OpResultErrorItem';
+export * from './QueryGraphQLArgs';
+export * from './OpResultInterfaces';
