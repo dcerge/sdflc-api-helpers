@@ -126,7 +126,7 @@ export class OpResult {
    * Invalidates the errors map cache.
    * Must be called whenever `this.errors` is mutated.
    */
-  private _invalidateErrorsCache() {
+  private _invalidateErrorsCache(): this {
     this._errorsMapCache = null;
     return this;
   }
@@ -155,9 +155,9 @@ export class OpResult {
 
     const { code, data, errors, total } = props;
 
-    this.code = code || OP_RESULT_CODES.OK;
+    this.code = code ?? OP_RESULT_CODES.OK;
     this.data = createData({ data, ...opt });
-    this.total = total || 0;
+    this.total = total ?? 0;
     this.errors = errors || [];
     this.opt = opt;
   }
@@ -227,7 +227,7 @@ export class OpResult {
    */
   getDataFieldValue(field: string, defaultValue = ''): any {
     const data = (this.data instanceof Array ? this.data[0] : this.data) || {};
-    return typeof data[field] === 'function' ? data[field](data) : data[field] || defaultValue;
+    return typeof data[field] === 'function' ? data[field](data) : (data[field] ?? defaultValue);
   }
 
   /**
@@ -308,6 +308,13 @@ export class OpResult {
   }
 
   /**
+   * Returns true if the operation completed successfully (code === OK).
+   */
+  isOk(): boolean {
+    return this.code === OP_RESULT_CODES.OK;
+  }
+
+  /**
    * Returns true if the operation succeeded and data is present.
    */
   didSucceedAndHasData(): boolean {
@@ -325,7 +332,7 @@ export class OpResult {
    * Returns true if data is present and the first item is not null or undefined.
    */
   hasData(): boolean {
-    return (this.data || []).length > 0 && this.data[0] != null && this.data[0] != undefined;
+    return (this.data || []).length > 0 && this.data[0] != null;
   }
 
   /**
@@ -495,7 +502,7 @@ export class OpResult {
       err.errors.push(errorMessage);
     }
 
-    if (code != undefined && !isNaN(code)) {
+    if (code != null && !isNaN(code)) {
       this.code = code;
     }
 
@@ -507,7 +514,7 @@ export class OpResult {
   /**
    * Removes all errors and invalidates the errors map cache.
    */
-  clearErrors() {
+  clearErrors(): OpResult {
     this.errors = [];
     this._invalidateErrorsCache();
     return this;
