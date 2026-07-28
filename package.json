@@ -16,7 +16,7 @@
     "build/**/*"
   ],
   "scripts": {
-    "build": "rimraf ./build && tsc && tsc -p tsconfig.esm.json",
+    "build": "rimraf ./build && tsc && tsc -p tsconfig.esm.json && node scripts/postbuild-esm.mjs",
     "lint": "ESLINT_USE_FLAT_CONFIG=true eslint .",
     "test": "jest --config jest.config.ts",
     "format": "prettier --write \"src/**/*.ts\"",
